@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>v2ray的WebSocket+TLS+Web | X3ZvaWQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="自从19年6月4号左右遇到的搭了一个简单的ss然后整个ip被墙之后就对 ss 产生了阴影，再之后也一直用的付费机场的ss，然后这个机场似乎也被查封了，经历了好几天不能上外网的煎熬之后某次水群发现了一个有好多免费ss节点的一个txt文档，终于再次连上了外网访问到了google.com。 经历了这么一个事件，深刻认识到了求人不如求己，别人梯子始终不会有自己的好，于是我还是选择了在自己的服务器上搭一个梯">
+<meta property="og:type" content="article">
+<meta property="og:title" content="v2ray的WebSocket+TLS+Web">
+<meta property="og:url" content="http://yoursite.com/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/index.html">
+<meta property="og:site_name" content="X3ZvaWQ">
+<meta property="og:description" content="自从19年6月4号左右遇到的搭了一个简单的ss然后整个ip被墙之后就对 ss 产生了阴影，再之后也一直用的付费机场的ss，然后这个机场似乎也被查封了，经历了好几天不能上外网的煎熬之后某次水群发现了一个有好多免费ss节点的一个txt文档，终于再次连上了外网访问到了google.com。 经历了这么一个事件，深刻认识到了求人不如求己，别人梯子始终不会有自己的好，于是我还是选择了在自己的服务器上搭一个梯">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/images/v2ray-websocket-tls-web/1.jpg">
+<meta property="article:published_time" content="2020-01-21T16:48:27.000Z">
+<meta property="article:modified_time" content="2020-01-21T16:50:00.148Z">
+<meta property="article:author" content="X3ZvaWQ">
+<meta property="article:tag" content="踩坑记录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/v2ray-websocket-tls-web/1.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="X3ZvaWQ" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">X3ZvaWQ</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-v2ray的WebSocket-TLS-Web" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/" class="article-date">
+  <time datetime="2020-01-21T16:48:27.000Z" itemprop="datePublished">2020-01-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      v2ray的WebSocket+TLS+Web
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>自从19年6月4号左右遇到的搭了一个简单的ss然后整个ip被墙之后就对 ss 产生了阴影，再之后也一直用的付费机场的ss，然后这个机场似乎也被查封了，经历了好几天不能上外网的煎熬之后某次水群发现了一个有好多免费ss节点的一个txt文档，终于再次连上了外网访问到了google.com。</p>
+<p>经历了这么一个事件，深刻认识到了求人不如求己，别人梯子始终不会有自己的好，于是我还是选择了在自己的服务器上搭一个梯子，然而shadowsocks已经让我的服务器被墙了几个月了，所以这次要选择一个更加安全的方式惹，经过了一番查找最后目标锁定了v2ray的WebSocket+TLS+Web</p>
+<p>主要记录一下我踩过的坑，主要流程从简。</p>
+<ul>
+<li><p>系统 CentOS 7 (理论上其他的系统应该也可行)</p>
+</li>
+<li><p>使用了lnmp一键安装包</p>
+</li>
+<li><p><a href="https://toutyrater.github.io/" target="_blank" rel="noopener">v2ray 配置指南</a></p>
+</li>
+<li><p><a href="https://toutyrater.github.io/advanced/wss_and_web.html" target="_blank" rel="noopener">上述指南中主要参照部分</a>（注意：该指南的配置文件中有坑）</p>
+</li>
+<li><p><a href="https://github.com/v2ray/v2ray-core/issues/1588" target="_blank" rel="noopener">解决上面的坑的参考</a> (坑就是报400 Bad Request: too many Host headers)</p>
+</li>
+<li><p><a href="https://github.com/v2ray/discussion/issues/260" target="_blank" rel="noopener">遇到的另一个坑的解决方案</a> (我并不是按这个方案解决的，详情看后文)</p>
+</li>
+</ul>
+<p><img src="/images/v2ray-websocket-tls-web/1.jpg" alt="img"></p>
+<p>其实并不是第一次尝试WebSocket+TLS+Web这个搭配，在服务器刚从墙里出来的时候我就有这个想法了，只不过看了网上的一些教程都使用了go的Caddy服务器，以及前段时间我的lnmp环境一直没有配好，所以最终没怎么挣扎。直到后来知道了有lnmp一键安装包，感谢皮老板让我知道了有这个东西(x</p>
+<p>首先安装好v2ray</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wget https:&#x2F;&#x2F;install.direct&#x2F;go.sh</span><br></pre></td></tr></table></figure>
+
+<p>之后执行获取的.sh脚本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo bash go.sh</span><br></pre></td></tr></table></figure>
+
+<p>看到<code>V2Ray v2.33 is installed.</code>的时候就已经安装完毕了，之后修改一下配置文件， 默认的配置文件的目录会在<code>/etc/v2ray/config.json</code></p>
+<p>我的配置如下，仅供参考，大部分参考自 <a href="https://toutyrater.github.io/" target="_blank" rel="noopener">v2ray 配置指南</a> ，我添加了log方便出现问题时可以定位问题所在，以及修改了wsSettings的path配置，原因在于当我使用/xxx作为path时nginx会让我一直指向404,原因暂且没有弄明白</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;log&quot;: &#123;</span><br><span class="line">    &quot;loglevel&quot;: &quot;info&quot;,</span><br><span class="line">    &quot;access&quot;: &quot;&#x2F;var&#x2F;log&#x2F;v2ray&#x2F;access.log&quot;,</span><br><span class="line">    &quot;error&quot;: &quot;&#x2F;var&#x2F;log&#x2F;v2ray&#x2F;error.log&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;inbounds&quot;: [&#123;</span><br><span class="line">    &quot;port&quot;: 10086,</span><br><span class="line">    &quot;listen&quot;: &quot;127.0.0.1&quot;,</span><br><span class="line">    &quot;protocol&quot;: &quot;vmess&quot;,</span><br><span class="line">    &quot;settings&quot;: &#123;</span><br><span class="line">      &quot;clients&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">          &quot;id&quot;: &quot;uuid安装时会自己生成,可以不用修改此处&quot;,</span><br><span class="line">          &quot;level&quot;: 1,</span><br><span class="line">          &quot;alterId&quot;: 64</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;streamSettings&quot;: &#123;</span><br><span class="line">      &quot;network&quot;: &quot;ws&quot;,</span><br><span class="line">      &quot;wsSettings&quot;: &#123;</span><br><span class="line">        &quot;path&quot;: &quot;&#x2F;&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;],</span><br><span class="line">  &quot;outbounds&quot;: [&#123;</span><br><span class="line">    &quot;protocol&quot;: &quot;freedom&quot;,</span><br><span class="line">    &quot;settings&quot;: &#123;&#125;</span><br><span class="line">  &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置完成后执行下面的命令启动即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl start v2ray</span><br></pre></td></tr></table></figure>
+
+<p>至此v2ray部分已经完成，之后需要整的就是nginx的代理部分了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ lnmp ssl add</span><br></pre></td></tr></table></figure>
+
+<p>执行上述命令之后根据引导一步步输入，其实主要是让他帮我自动配ssl,很多设定都会在后面被改掉的。</p>
+<p>然后到<code>/usr/local/nginx/conf/vhost</code>内找到domain.com.conf修改配置，这个文件的名字取决于上面填入的。文件的路径可以<code>$ whereis nginx</code>来找到，使用了lnmp一键安装包的话会位于这个位置。我的配置文件如下，主要是一定要删除 <a href="https://toutyrater.github.io/" target="_blank" rel="noopener">v2ray 配置指南</a> 文档内多余的 <code>proxy_set_header Host $host;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">server</span><br><span class="line">    &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name domain.com ;</span><br><span class="line"></span><br><span class="line">        location &#x2F; &#123;</span><br><span class="line">            proxy_redirect off;</span><br><span class="line">            proxy_pass http:&#x2F;&#x2F;127.0.0.1:16789;</span><br><span class="line">            proxy_http_version 1.1;</span><br><span class="line">            proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">            proxy_set_header Connection &quot;upgrade&quot;;</span><br><span class="line">            proxy_set_header Host $http_host;</span><br><span class="line"></span><br><span class="line">            # Show realip in v2ray access.log</span><br><span class="line">            proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        access_log  &#x2F;home&#x2F;wwwlogs&#x2F;domain.com.log;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">server</span><br><span class="line">    &#123;</span><br><span class="line">        listen 443 ssl;</span><br><span class="line">        server_name domain.com ;</span><br><span class="line"></span><br><span class="line">        ssl_certificate &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;ssl&#x2F;domain.com&#x2F;fullchain.cer;</span><br><span class="line">        ssl_certificate_key &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;ssl&#x2F;domain.com&#x2F;domain.com.key;</span><br><span class="line">        ssl_session_timeout 5m;</span><br><span class="line">        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">        ssl_prefer_server_ciphers on;</span><br><span class="line">        ssl_ciphers &quot;TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5&quot;;</span><br><span class="line">        ssl_session_cache builtin:1000 shared:SSL:10m;</span><br><span class="line">        </span><br><span class="line">        ssl_dhparam &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;ssl&#x2F;dhparam.pem;</span><br><span class="line"></span><br><span class="line">        location &#x2F; &#123;</span><br><span class="line">            proxy_redirect off;</span><br><span class="line">            proxy_pass http:&#x2F;&#x2F;127.0.0.1:16789;</span><br><span class="line">            proxy_http_version 1.1;</span><br><span class="line">            proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">            proxy_set_header Connection &quot;upgrade&quot;;</span><br><span class="line">            proxy_set_header Host $http_host;</span><br><span class="line"></span><br><span class="line">            # Show realip in v2ray access.log</span><br><span class="line">            proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        access_log  &#x2F;home&#x2F;wwwlogs&#x2F;domain.com.log;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后重新加载nginx的配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service nginx reload</span><br></pre></td></tr></table></figure>
+
+<p>在之后客户端链接即可，这里就没什么特别的了，直接参照 <a href="https://toutyrater.github.io/" target="_blank" rel="noopener">v2ray 配置指南</a> 内的<a href="https://toutyrater.github.io/prep/install.html" target="_blank" rel="noopener">安装部分</a> 客户端安装即可，也可以选择可视化的GUI v2rayN来连接服务器。</p>
+<p>想了想好像写的有点多了，本来只打算记录一下我踩过的坑的。算了写了就写了吧，删起来更心疼，就这样啦~</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/" data-id="ck5o4g53j0004mouxdp84bewn" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          用树莓派搭一个路由器
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">整一个ipv6的网站</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/">雨中冒险2-拾取装备的详细描述修改</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/">用树莓派搭一个路由器</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/">v2ray的WebSocket+TLS+Web</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/">整一个ipv6的网站</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/">Linux上的饥荒服务器搭建</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 X3ZvaWQ<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
