@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>饥荒联机版mod开发摸鱼(一) | X3ZvaWQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="今日起床较晚，本来计划着今天的每日一摸应该去搞一搞es6的Proxy 并且也确实看了一会儿觉得挺好玩的，但是还没有摸完就有人提到了昨天玩饥荒遇到的事情 我们装了一个鱼塘的mod，然后那个作者上一次更新是好几年前，然后近期饥荒更新了一个部分就是原来钓鱼获得的死鱼现在是活鱼并且可以称重。 但是呢，那个鱼塘他的合成配方还是那个死鱼，所以就不能合成了。。。 然后我在游戏的scripts目录找了半天并没有找">
+<meta property="og:type" content="article">
+<meta property="og:title" content="饥荒联机版mod开发摸鱼(一)">
+<meta property="og:url" content="http://yoursite.com/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/index.html">
+<meta property="og:site_name" content="X3ZvaWQ">
+<meta property="og:description" content="今日起床较晚，本来计划着今天的每日一摸应该去搞一搞es6的Proxy 并且也确实看了一会儿觉得挺好玩的，但是还没有摸完就有人提到了昨天玩饥荒遇到的事情 我们装了一个鱼塘的mod，然后那个作者上一次更新是好几年前，然后近期饥荒更新了一个部分就是原来钓鱼获得的死鱼现在是活鱼并且可以称重。 但是呢，那个鱼塘他的合成配方还是那个死鱼，所以就不能合成了。。。 然后我在游戏的scripts目录找了半天并没有找">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-25T15:20:44.000Z">
+<meta property="article:modified_time" content="2020-01-25T15:50:46.387Z">
+<meta property="article:author" content="X3ZvaWQ">
+<meta property="article:tag" content="每日一摸">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="X3ZvaWQ" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">X3ZvaWQ</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-饥荒联机版mod开发摸鱼-一" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" class="article-date">
+  <time datetime="2020-01-25T15:20:44.000Z" itemprop="datePublished">2020-01-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      饥荒联机版mod开发摸鱼(一)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今日起床较晚，本来计划着今天的每日一摸应该去搞一搞<code>es6</code>的<code>Proxy</code></p>
+<p>并且也确实看了一会儿觉得挺好玩的，但是还没有摸完就有人提到了昨天玩饥荒遇到的事情</p>
+<p>我们装了一个鱼塘的mod，然后那个作者上一次更新是好几年前，然后近期饥荒更新了一个部分就是原来钓鱼获得的死鱼现在是活鱼并且可以称重。</p>
+<p>但是呢，那个鱼塘他的合成配方还是那个死鱼，所以就不能合成了。。。</p>
+<p>然后我在游戏的<code>scripts</code>目录找了半天并没有找到淡水鱼这个<code>prefabs</code></p>
+<p>然后我就寻思着说不定fish即可以表示死鱼也能表示活鱼呢。。然后我就以这个错误的方向去找了很久的证据，然后脸被打的啪啪响。</p>
+<p>其实一开始我会这么想纯粹是因为看到了一个<code>meats.lua</code>，也就是肉，在这个文件里面定义了很多的肉类，然后由于这个游戏的代码结构并不是很熟悉，所以我就踩了一个坑(x</p>
+<p>找到正确的方向是因为突然灵光一闪，根据饥荒的烹饪系统，每个食物都会有不同的属性，比如鱼是1个单位的鱼，1个单位的肉。然后我找到了<code>scripts</code>根目录下的<code>cooking.lua</code>文件，这个文件里面定义了各个食物的烹饪属性，然后我翻到了fish发现它只有一个定义。然后人都傻了。因为有一个叫<code>Show Me</code>的mod可以在游戏内显示食物的各个烹饪属性，然后之前在游戏内看到了活鱼是0.5个单位的鱼和0.5个单位的肉。</p>
+<p>不对，然后我就继续在<code>cooking.lua</code>找了一会儿，看到了一个肉和鱼都是0.5单位的，然后看到了一个<code>prefab</code>叫<code>pondfish</code>。然后。。莫非就是它了？这就是我找了一个下午的它？</p>
+<p>在游戏内开控制台</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c_give(&#39;pondfish&#39;)</span><br></pre></td></tr></table></figure>
+
+<p>啊！是他，一条活生生的鱼。</p>
+<p>感觉干了一下午的无用功，看了挺多代码的。</p>
+<p>收获大概就是大概明白了饥荒这个游戏scripts目录下面的一些文件的作用，以及更多的关于<code>lua</code>的语言特性，常用写法什么的，跟我之前写手游挂机脚本用的那些<code>lua</code>有比较大的区别。</p>
+<p>可以看到在prefabs文件夹下的很多东西都会有<code>onXxxx</code>的<code>function</code>，里面大致是一些触发某事件的行为，但是我并没有找到调用这些事件的地方，或许可以看看<code>actions.lua</code>这个文件，当然还有更多的可能需要找。</p>
+<p>然后就是看了半天并没有找到程序的入口，这让人十分难受。也就是所谓的main函数，我的想法就是他应该会在一个很明显的位置，然后刚刚找到<code>pondfish</code>这个东西突然发现我看了这么久的代码还不知道到处可以看到的<code>inst</code>到底是个什么意思，遂百度之：<code>instance</code>指代的是某个物品或者单位的实例。</p>
+<p>然后发现每个东西的下面总会有一个<code>fn</code>或者<code>commonfn</code>方法，看起来特别像扮演构造方法的角色，然后第一行就是<code>local inst = CreateEntity()</code>随在<code>CreateEntity</code>上按下了转到定义，然后一小会儿之后vscode带我到了一个叫<code>mainfunctions.lua</code>的文件里面，好家伙，里面有好多我平时看到的奇奇怪怪的函数。</p>
+<p>然后最关键的是在这个文件旁边我还看到了一个<code>main.lua</code>,联想到c语言的<code>int main()</code>，再想到java的<code>public static void main(String[] args)</code>，这莫非就是。。遂点开</p>
+<p>哦豁，看起来很像这个东西了啊！</p>
+<p>里面有好多的<code>require()</code>，看起来引用了很多的东西。</p>
+<p>但是开头也有很多没预先定义的方法，所以最开始的入口是不是这个还真的不是很清楚，可能需要明天继续看</p>
+<p>不得不说，慢慢的摸透一个程序的运行机制真的很爽(雾</p>
+<p>然后这可能是真的每日摸鱼吧(x</p>
+<p>然后又回到最初的起点，要让现在的版本可以做出那个鱼塘应该只需要吧<code>AddRecipe()</code>方法内的参数的<code>fish</code>换成<code>pondfish</code>就好了</p>
+<p>不过要考虑到在新的版本这个mod还能不能变得好玩，那么就要让他的生成物也变成现在的版本的东西。</p>
+<p>或许可以考虑以后可以业余写一写饥荒的mod，23333</p>
+<p>其实游戏开发者好像也为<code>modder</code>留下了很多的余地,虽然这可能也是解释型的脚本语言不可避免地吧。</p>
+<p>然后就是这样了，前面提到的目标留到以后实现。。嗯</p>
+<p>我寻思着我应该会再有一篇文章叫做饥荒联机版mod开发摸鱼(二)什么的吧，2333</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" data-id="ck5trtyv90008hcux0kvfhqvz" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">laravel的一点理解...?</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 20px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/">饥荒联机版mod开发摸鱼(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/">laravel的一点理解...?</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/">ES6变量的解构赋值</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/">雨中冒险2-拾取装备的详细描述修改</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/">用树莓派搭一个路由器</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 X3ZvaWQ<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
