@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>饥荒联机版mod开发摸鱼(二) | X3ZvaWQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="今天又遇到了一个全新的问题，就是把昨天的鱼塘mod配方改了，然后可以做出来鱼塘了，但是这个鱼塘他并不会生产东西了。于是我今天继续琢磨起来了(x 在每个prefabs的看着很像构造方法的fn内一般能看到许多的inst:AddComponent操作，似乎是给这个实例绑定一个部件，嗯。。也有一种接口的意思，比如这段代码 123inst:AddComponent(&quot;harvestable&quot;)inst.co">
+<meta property="og:type" content="article">
+<meta property="og:title" content="饥荒联机版mod开发摸鱼(二)">
+<meta property="og:url" content="http://yoursite.com/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/index.html">
+<meta property="og:site_name" content="X3ZvaWQ">
+<meta property="og:description" content="今天又遇到了一个全新的问题，就是把昨天的鱼塘mod配方改了，然后可以做出来鱼塘了，但是这个鱼塘他并不会生产东西了。于是我今天继续琢磨起来了(x 在每个prefabs的看着很像构造方法的fn内一般能看到许多的inst:AddComponent操作，似乎是给这个实例绑定一个部件，嗯。。也有一种接口的意思，比如这段代码 123inst:AddComponent(&quot;harvestable&quot;)inst.co">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-26T05:19:56.000Z">
+<meta property="article:modified_time" content="2020-01-26T16:41:38.439Z">
+<meta property="article:author" content="X3ZvaWQ">
+<meta property="article:tag" content="每日一摸">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="X3ZvaWQ" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">X3ZvaWQ</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-饥荒联机版mod开发摸鱼-二" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/" class="article-date">
+  <time datetime="2020-01-26T05:19:56.000Z" itemprop="datePublished">2020-01-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      饥荒联机版mod开发摸鱼(二)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今天又遇到了一个全新的问题，就是把昨天的鱼塘mod配方改了，然后可以做出来鱼塘了，但是这个鱼塘他并不会生产东西了。于是我今天继续琢磨起来了(x</p>
+<p>在每个<code>prefabs</code>的看着很像构造方法的<code>fn</code>内一般能看到许多的<code>inst:AddComponent</code>操作，似乎是给这个实例绑定一个部件，嗯。。也有一种接口的意思，比如这段代码</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">inst:AddComponent(<span class="string">"harvestable"</span>)</span><br><span class="line">inst.components.harvestable:SetUp(<span class="string">"pondfish"</span>, <span class="number">3</span>, <span class="literal">nil</span>, onharvest, updatelevel)</span><br><span class="line">inst:ListenForEvent(<span class="string">"childgoinghome"</span>, onchildgoinghome)</span><br></pre></td></tr></table></figure>
+
+<p>就是给当前实例绑定一个harvestable接口，让这个实例变成一个可被收获的实例，然后第二行进一步设置收获的规则，这里调用了一个<code>harvestable</code>实例的<code>SetUp</code>的函数，这个类的代码在<code>scripts/components/harvestable.lua</code>，代码如下</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Harvestable:SetUp</span><span class="params">(product, max, time, onharvest, ongrow)</span></span></span><br><span class="line">    self:SetProduct(product, <span class="built_in">max</span>)</span><br><span class="line">    self:SetGrowTime(<span class="built_in">time</span>)</span><br><span class="line">    self:SetOnGrowFn(ongrow)</span><br><span class="line">    self:SetOnHarvestFn(onharvest)</span><br><span class="line">    self:StartGrowing()</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>各个参数的语义也很清晰，然后看看这个接口是怎么实现的。在开头部分可以看到一部分类的定义：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> Harvestable = Class(<span class="function"><span class="keyword">function</span><span class="params">(self, inst)</span></span></span><br><span class="line">        self.inst = inst</span><br><span class="line">        self.produce = <span class="number">0</span></span><br><span class="line">        self.growtime = <span class="literal">nil</span></span><br><span class="line">        self.product = <span class="literal">nil</span></span><br><span class="line">        self.ongrowfn = <span class="literal">nil</span></span><br><span class="line">        self.maxproduce = <span class="number">1</span></span><br><span class="line">    <span class="keyword">end</span>,</span><br><span class="line">    <span class="literal">nil</span>,</span><br><span class="line">    &#123;</span><br><span class="line">        produce = onproduce,</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>不得不说，<code>lua</code>这个闭包是真的很丑,虽然我也不清楚这个能不能算得上是一种闭包，但是从代码大概可以知道这个类会有哪些属性，好的我们继续。回到<code>Harvestable:SetUp</code>方法，可以看到方法体内部有5行。前面四行都是设置一些类属性的，然后最后调用了一个没有参数的方法，好的 那个很可疑，遂找到方法体：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Harvestable:StartGrowing</span><span class="params">(time)</span></span></span><br><span class="line">    self:StopGrowing()</span><br><span class="line">    <span class="keyword">local</span> growtime = <span class="built_in">time</span> <span class="keyword">or</span> self.growtime</span><br><span class="line">    <span class="keyword">if</span> growtime <span class="keyword">then</span></span><br><span class="line">        self.task = self.inst:DoTaskInTime(growtime, <span class="function"><span class="keyword">function</span><span class="params">()</span></span> self:Grow() <span class="keyword">end</span>, <span class="string">"grow"</span>)</span><br><span class="line">        self.targettime = GetTime() + growtime</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>大意是，如果<code>growtime</code>有值的话就执行一个<code>inst:DoTaskInTime</code>，那么问题来了，这个代码好像不好找。</p>
+<p>好了我又回来了，通过全局搜索<code>DoTaskInTime(time</code>找到了一个疑似该方法的定义，位于<code>scripts/entityscript.lua</code>文件内，代码如下：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">EntityScript:DoTaskInTime</span><span class="params">(time, fn, ...)</span></span></span><br><span class="line">    <span class="comment">--print ("DO TASK IN TIME", time, self)</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.pendingtasks <span class="keyword">then</span></span><br><span class="line">        self.pendingtasks = &#123;&#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">local</span> per = scheduler:ExecuteInTime(<span class="built_in">time</span>, fn, self.GUID, self, ...)</span><br><span class="line">    self.pendingtasks[per] = <span class="literal">true</span></span><br><span class="line">    per.onfinish = task_finish <span class="comment">-- function() if self and self.pendingtasks then self.pendingtasks[per] = nil end end</span></span><br><span class="line">    <span class="keyword">return</span> per</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>对不起，看着有点复杂，涉及的可能会有点多，所以我决定先掠过一下，留下一个猜测根据<code>scheduler:ExecuteInTime</code>这是一个让某个函数在某个时间点后执行的方法。</p>
+<p>然后在<code>StartGrowing(time)</code>内传入的是一个<code>function() self:Grow() end</code>的很像闭包的东西，好的然后找到中间那个方法的代码：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Harvestable:Grow</span><span class="params">()</span></span></span><br><span class="line">    <span class="keyword">if</span> self.produce &lt; self.maxproduce <span class="keyword">then</span></span><br><span class="line">        self.produce = self.produce + <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> self.ongrowfn <span class="keyword">then</span></span><br><span class="line">            self.ongrowfn(self.inst, self.produce)</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">if</span> self.produce &lt; self.maxproduce <span class="keyword">then</span></span><br><span class="line">            self:StartGrowing()</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            self:StopGrowing()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>是一个非常简单的逻辑，所以对于这个接口是怎么运行的就大概明白了。</p>
+<p>在前面的<code>inst.components.harvestable:SetUp(&quot;pondfish&quot;, 3, nil, onharvest, updatelevel)</code>内第三个时间参数是<code>nil</code>所以不会长，但是之前没改mod文件之前有蜜蜂会去采蜜，然后就会有鱼了。</p>
+<p>但是在<code>harvest</code>部分还有第三行<code>inst:ListenForEvent(&quot;childgoinghome&quot;, onchildgoinghome)</code>，意思似乎是添加一个<code>Listener</code>来监听孩子回家，然后第二个参数好像在哪里见过的方法，遂在这个mod的代码内搜索:</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">onchildgoinghome</span><span class="params">(inst, data)</span></span></span><br><span class="line">    <span class="keyword">if</span> data.child <span class="keyword">and</span> data.child.components.pollinator <span class="keyword">and</span> data.child.components.pollinator:HasCollectedEnough() <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">if</span> inst.components.harvestable <span class="keyword">then</span></span><br><span class="line">            inst.components.harvestable:Grow()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>哦豁，他直接在这里调用了<code>harvestable</code>的<code>Grow</code>方法。所以意思是只要蜜蜂去采蜜了，那么就能有东西生成了，但是现在的问题是它根本就不产生蜜蜂。</p>
+<p>所以猜测问题有可能是在生蜜蜂那里</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">inst:AddComponent(<span class="string">"childspawner"</span>)</span><br><span class="line">inst.components.childspawner.childname = <span class="string">"bee"</span></span><br><span class="line">inst.components.childspawner:SetRegenPeriod(TUNING.BEEBOX_REGEN_TIME)</span><br><span class="line">inst.components.childspawner:SetSpawnPeriod(TUNING.BEEBOX_RELEASE_TIME)</span><br><span class="line">inst.components.childspawner:SetMaxChildren(TUNING.BEEBOX_BEES)  </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> TheWorld.state.isday <span class="keyword">and</span> TheWorld.state.issummer <span class="keyword">then</span></span><br><span class="line">    inst.components.childspawner:StartSpawning()</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>嗯。。？这里怎么混进了一个判断语句？看语义是如果是在夏天的白天就开始生动物</p>
+<p>感觉应该还有别的地方有这个<code>StartSpawning</code>,不然在其它季节建造的不就炸了。然后搜索<code>StartSpawning</code>,找到了这个方法：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">OnIsDay</span><span class="params">(inst, isday)</span></span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> isday <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">if</span> inst.components.harvestable <span class="keyword">and</span> inst.components.harvestable.growtime <span class="keyword">then</span></span><br><span class="line">            inst.components.harvestable:StopGrowing()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">if</span> inst.components.childspawner <span class="keyword">then</span></span><br><span class="line">            inst.components.childspawner:StopSpawning()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">elseif</span> <span class="keyword">not</span> TheWorld.state.iswinter <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">if</span> inst.components.harvestable <span class="keyword">and</span> inst.components.harvestable.growtime <span class="keyword">then</span></span><br><span class="line">            inst.components.harvestable:StartGrowing()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">if</span> inst.components.childspawner <span class="keyword">then</span></span><br><span class="line">            inst.components.childspawner:StartSpawning()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>逻辑有些混乱，找找在哪里调用了这个方法吧</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inst:WatchWorldState(&quot;isday&quot;, OnIsDay)</span><br></pre></td></tr></table></figure>
+
+<p>感觉又是一个<code>Listener</code>，或者说<code>Watcher</code>？那么大概就明白了？ 每个白天的开始都会执行一次这个方法？</p>
+<p>然后在这个方法里面控制了怎么产生产物。</p>
+<p>除此之外也有<code>onsleep</code>和<code>stopsleep</code>的方法在里面控制了通过<code>harvestable</code>产生产品，并且在构造方法内把这两个方法绑定到了<code>entitysleep</code>和<code>entitywake</code>两个<code>Listener</code>上，然而这两个<code>Listener</code>什么时候触发我也完全不知道。</p>
+<p>剩下的东西明天再写，咕咕咕</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/" data-id="ck5v93m8100094kux5kn767h1" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">饥荒联机版mod开发摸鱼(一)</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 20px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 13.33px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 16.67px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/">饥荒联机版mod开发摸鱼(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/">饥荒联机版mod开发摸鱼(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/">laravel的一点理解...?</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/">ES6变量的解构赋值</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/">雨中冒险2-拾取装备的详细描述修改</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 X3ZvaWQ<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
