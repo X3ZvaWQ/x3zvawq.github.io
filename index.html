@@ -65,6 +65,137 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Laravel的Eloquent" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/01/31/Laravel%E7%9A%84Eloquent/" class="article-date">
+  <time datetime="2020-01-31T10:38:53.000Z" itemprop="datePublished">2020-01-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/31/Laravel%E7%9A%84Eloquent/">Laravel的Eloquent</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="laravel的Model"><a href="#laravel的Model" class="headerlink" title="laravel的Model"></a>laravel的Model</h1><p>在对<code>laravel</code>的理解一文中，结尾提到了一下<code>Model</code></p>
+<p>然后考虑到篇幅限制，以及暂时用不到，所以就没有做更详细的阐述</p>
+<p>说到<code>Model</code>，就必然离不开数据库，因为Model就是一个后端应用的数据层。他的位置应该是在控制器与数据库之间，负责的部分是直接与数据库进行交互，返回数据给控制器。</p>
+<p>在知道model是干什么的情况下，我们需要做什么呢？</p>
+<p><strong>我们现在的数据库还没创建好，所以首先创建好数据库</strong></p>
+<p>注意，如果使用mysql的话，关于数据库的部分配置在<code>.env</code>文件内:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DB_CONNECTION&#x3D;mysql</span><br><span class="line">DB_HOST&#x3D;127.0.0.1</span><br><span class="line">DB_PORT&#x3D;3306</span><br><span class="line">DB_DATABASE&#x3D;laravel</span><br><span class="line">DB_USERNAME&#x3D;root</span><br><span class="line">DB_PASSWORD&#x3D;root</span><br></pre></td></tr></table></figure>
+
+<p>内，配置好用户名和密码之后，我们需要做的就是创建一个和上面<code>DB_DATABASE</code>配置项同名的数据库。</p>
+<p>如果使用<code>navicat</code>或者<code>phpAdmin</code>可能会比较轻松，如果使用mysql命令的话大概是登陆进数据库之后<code>create database laravel</code></p>
+<p>然后剩下的部分，都通过php代码完成。</p>
+<p>假设存在这样的一个表：</p>
+<p><img src="images/laravel-model/1.png" alt="image-20200130190618309"></p>
+<p>这个表有6个字段，分别是</p>
+<ul>
+<li><code>id</code>作为每一条数据的唯一识别编号</li>
+<li><code>user_id</code>用来标识与这个post相关联的用户</li>
+<li><code>title</code>用于记录一篇文章的标题</li>
+<li><code>content</code>用于记录一篇文章的内容</li>
+<li><code>created_at</code>和<code>updated_at</code>用于记录这篇文章的创建时间和上一次更改的时间</li>
+</ul>
+<p>当我在把一个东西(这里以一篇文章为例)存进数据库的时候，其实就是这样的操作，想一下需要储存这个东西的哪些数据，然后列出来，其实就设计了这么样的一个表。</p>
+<p>现在我们知道一条文章的数据有哪些属性了，我们该怎么在数据库里建立这么一个表呢？答案是通过laravel的migrate机制，也就是迁移。</p>
+<p>我通过在根目录执行一条命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php artisan make:migration create_posts_table</span><br></pre></td></tr></table></figure>
+
+<p>然后就能观察到我的项目根目录下的<code>/database/migrations</code>下多了一个文件，文件名应该是<code>2020_0x_xx_xxxxxx_create_yyyyy_table.php</code>,x和你创建这个迁移的时间有关，<code>yyyy</code>就是执行命令<code>make:migration</code>输入的参数，按照规范需要创建一个表的时候一般<code>create_&lt;表名&gt;_table</code>，其中表名按照规范一般是储存的东西的小写负数形式，比如<code>posts</code>。</p>
+<p>创建完的文件是这样的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> <span class="title">Illuminate</span>\<span class="title">Database</span>\<span class="title">Migrations</span>\<span class="title">Migration</span>;</span><br><span class="line"><span class="keyword">use</span> <span class="title">Illuminate</span>\<span class="title">Database</span>\<span class="title">Schema</span>\<span class="title">Blueprint</span>;</span><br><span class="line"><span class="keyword">use</span> <span class="title">Illuminate</span>\<span class="title">Support</span>\<span class="title">Facades</span>\<span class="title">Schema</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CreatePostsTable</span> <span class="keyword">extends</span> <span class="title">Migration</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Run the migrations.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> void</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">up</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Schema::create(<span class="string">'posts'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(Blueprint $table)</span> </span>&#123;</span><br><span class="line">            $table-&gt;bigIncrements(<span class="string">'id'</span>);</span><br><span class="line">            $table-&gt;timestamps();</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Reverse the migrations.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> void</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">down</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Schema::dropIfExists(<span class="string">'posts'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个继承了<code>Migration</code>的类，他的里面有两个方法，一个是<code>up</code>一个是<code>down</code>，其中up是在执行迁移的时候调用的，<code>down</code>是在回滚迁移的时候用的。</p>
+<p>然后需要修改的部分就是</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Schema::create(<span class="string">'posts'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(Blueprint $table)</span> </span>&#123;</span><br><span class="line">    $table-&gt;bigIncrements(<span class="string">'id'</span>);</span><br><span class="line">    $table-&gt;timestamps();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>被包在function中间的部分，按照前面的表结构，我应该这么写：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Schema::create(<span class="string">'posts'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(Blueprint $table)</span> </span>&#123;</span><br><span class="line">    $table-&gt;bigIncrements(<span class="string">'id'</span>);</span><br><span class="line">    $table-&gt;bigInteger(<span class="string">'user_id'</span>);</span><br><span class="line">    $table-&gt;string(<span class="string">'title'</span>);</span><br><span class="line">    $table-&gt;string(<span class="string">'content'</span>);</span><br><span class="line">    $table-&gt;timestamps();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>至于为什么这么写自己比较与观察，然后查看<a href="https://learnku.com/docs/laravel/6.x/migrations/5173" target="_blank" rel="noopener">官方文档的数据库迁移</a>部分</p>
+<p>设计好表之后执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php artisan migrate</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>关于前面提到的回滚：比如当我创建了一个表，并且已经迁移进了数据库发现少写了一些属性并且代码没有上传的时候，就可以执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php artisan migrate:rollback --step&#x3D;1</span><br></pre></td></tr></table></figure>
+
+<p>回滚上一个迁移</p>
+</blockquote>
+<p>然后能看到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Migrating: 2020_01_30_110448_create_posts_table</span><br><span class="line">Migrated:  2020_01_30_110448_create_posts_table (0.02 seconds)</span><br></pre></td></tr></table></figure>
+
+<p>告诉我迁移成功了。</p>
+<p><strong>数据表创建完成了，然后我们就需要为这一个储存的东西定义一个<code>Model</code></strong></p>
+<p>正如对laravel的理解一文的结尾所说，一个应用可能会有很多种数据呢，比如用户啦，比如文章啦。laravel不可能帮我们尽善尽美的都定义好，所以这个数据模型的模板就需要我们自己来定义。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php artisan make:model Post</span><br></pre></td></tr></table></figure>
+
+<p>然后就能看到在项目的根目录下的<code>/app</code>内多了一个<code>Post.php</code>，初始内容如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">App</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> <span class="title">Illuminate</span>\<span class="title">Database</span>\<span class="title">Eloquent</span>\<span class="title">Model</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Post</span> <span class="keyword">extends</span> <span class="title">Model</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个东西就是我们会经常用到的<code>laravel</code>的<code>Model</code>也叫<code>Eloquent</code>模型啦</p>
+<p>然后关于Model的更多东西请一定要去官方文档看，因为这东西他用处很多很多，我只讲讲最基础的增删改查什么的，这个的文档在：<a href="https://learnku.com/docs/laravel/6.x/eloquent/5176" target="_blank" rel="noopener">https://learnku.com/docs/laravel/6.x/eloquent/5176</a></p>
+<p>这里给大家介绍一个东西叫做<code>tinker</code>，这是一个交互式编程的环境，可以通过这条命令进入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php artisan tinker</span><br></pre></td></tr></table></figure>
+
+<p><strong>跟数据库有关的有什么东西呢都？无非就是增删改查啦。</strong></p>
+<h2 id="增"><a href="#增" class="headerlink" title="增"></a>增</h2><p>单条数据的增加我们可以这样</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$post = <span class="keyword">new</span> Post;</span><br><span class="line">$post-&gt;user_id = <span class="number">1</span>;</span><br><span class="line">$post-&gt;title = <span class="string">'gugugu'</span>;</span><br><span class="line">$post-&gt;content = <span class="string">'ge zi lai le'</span>;</span><br><span class="line">$post-&gt;save();</span><br></pre></td></tr></table></figure>
+
+<p>当然也可以这么写:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Post::create([</span><br><span class="line">    <span class="string">'title'</span> =&gt; <span class="string">'gugugu'</span>,</span><br><span class="line">    <span class="string">'content'</span> =&gt; <span class="string">'ge zi lai le'</span>,</span><br><span class="line">    <span class="string">'user_id'</span> =&gt; <span class="number">1</span></span><br><span class="line">]);</span><br></pre></td></tr></table></figure>
+
+<p>但是这么写的话是一种批量赋值的手法，需要我们在model内定义什么样的属性允许批量赋值，比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Post extends Model</span><br><span class="line">&#123;</span><br><span class="line">    protected $guarded &#x3D; [&#39;id&#39;, &#39;user_id&#39;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就是，除了<code>id</code>和<code>user_id</code>之外的东西都可以批量被赋值给新的<code>post</code></p>
+<p>同样也可以声明一个<code>$fillable</code>来声明哪些属性是允许被批量赋值的，简单地说的话</p>
+<p><code>$guarded</code> 是黑名单而 <code>$fillable</code> 是白名单</p>
+<h2 id="查"><a href="#查" class="headerlink" title="查"></a>查</h2><p>当需要根据id来查找一条数据，也就是获取一个Post实例：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$post = Post::find($id);</span><br></pre></td></tr></table></figure>
+
+<p>当需要根据某个条件来查找一条数据，比如<code>title</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取一条数据,也就是一个Post实例 -&gt;first()</span></span><br><span class="line"><span class="comment">//获取第一个文章标题是gugugu的文章</span></span><br><span class="line">$post = Post::where(<span class="string">'title'</span>,<span class="string">'gugugu'</span>)-&gt;first();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取所有数据,返回的会是一个集合,可以通过foreach进行遍历 -&gt;get()</span></span><br><span class="line"><span class="comment">//获取所有user_id大于1的文章</span></span><br><span class="line">$post = Post::where(<span class="string">'user_id'</span>,<span class="string">'&gt;'</span>,<span class="number">1</span>)-&gt;get();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//也支持多个条件的说</span></span><br><span class="line">$post = Post::where([</span><br><span class="line">	<span class="string">'user_id'</span> =&gt; <span class="number">1</span>,</span><br><span class="line">    <span class="string">'title'</span> =&gt; <span class="string">'gugugu'</span></span><br><span class="line">])-&gt;first();</span><br></pre></td></tr></table></figure>
+
+<h2 id="删"><a href="#删" class="headerlink" title="删"></a>删</h2><p>删除十分简单，在前面的查找获取到了某个实例之后，只需要调用</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$post-&gt;delete();</span><br></pre></td></tr></table></figure>
+
+<p>即可删除数据</p>
+<h2 id="改"><a href="#改" class="headerlink" title="改"></a>改</h2><p>修改同样十分简单，直接修改实例的属性然后<code>save</code>即可，例：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$post-&gt;title = <span class="string">'bugu bugu bugu'</span>;</span><br><span class="line">$post-&gt;save();</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/31/Laravel%E7%9A%84Eloquent/" data-id="ck621fc170001xhuxdkub1dja" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-ES6的Proxy" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/01/27/ES6%E7%9A%84Proxy/" class="article-date">
@@ -138,7 +269,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/27/ES6%E7%9A%84Proxy/" data-id="ck5wn85tk0000qkuxhnd06t9l" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/27/ES6%E7%9A%84Proxy/" data-id="ck621fc110000xhuxf4chfiu3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
@@ -217,7 +348,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/" data-id="ck5wn85tz000jqkux7lkwc8qr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/" data-id="ck621fc1r000txhuxg04z328v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
@@ -285,7 +416,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" data-id="ck5wn85tx000dqkuxcs9n4rsk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" data-id="ck621fc1g000hxhux859k4fs5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
@@ -440,7 +571,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/" data-id="ck5wn85tr0004qkuxdl8u8drm" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/" data-id="ck621fc1a0004xhuxdx1e8m34" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
@@ -564,7 +695,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/" data-id="ck5wn85to0001qkux3eb91gws" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/" data-id="ck621fc1d0008xhux6ntp64hs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
@@ -618,7 +749,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/" data-id="ck5wn85ty000hqkux6fu4edba" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/" data-id="ck621fc1h000jxhux01sw99bf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li></ul>
@@ -774,7 +905,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" data-id="ck5wn85tx000eqkuxaqg3hn0n" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" data-id="ck621fc1f000dxhux0fquegp6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
@@ -856,7 +987,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/" data-id="ck5wn85tw000aqkuxcaendvec" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/" data-id="ck621fc1f000fxhux6dty1io5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
@@ -916,102 +1047,10 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" data-id="ck5wn85tu0008qkux33kgb1x3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" data-id="ck621fc1e000axhux9f437lbd" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Linux上的饥荒服务器搭建" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" class="article-date">
-  <time datetime="2020-01-21T16:35:04.000Z" itemprop="datePublished">2020-01-22</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/">Linux上的饥荒服务器搭建</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>无聊的暑假，想和小伙伴联机玩一下饥荒，本来也想不到要自己搭一个服务器的，奈何后来直接游戏里面启动服务器发现客机总是会卡的令人难以接受，然后我才意识我我和我的小伙伴一个是电信网一个是移动网。以及我们玩人类一败涂地也有着比较高的延迟，于是没有办法了，想好好打饥荒就必须得搭一个服务器了。正好有一个闲置的阿里云服务器，因为嫌备案麻烦一直丢在那里，正好物尽其用。</p>
-<p><img src="/images/linux-dst-service-build/1.jpg" alt="img"></p>
-<p>确实踩了不少的坑，因为饥荒的配置文件经过一次不小的更新，整个都变了，所以网上很多的教程其实都已经过期了，本文主要讲述一下我是怎么干的吧.</p>
-<ul>
-<li><a href="https://developer.valvesoftware.com/wiki/SteamCMD" target="_blank" rel="noopener">steamcmd怎么使用的官方教程(英文)</a></li>
-<li><a href="https://dontstarve.fandom.com/wiki/Guides/Don’t_Starve_Together_Dedicated_Servers" target="_blank" rel="noopener">自建服务器的饥荒官方教程(英文)</a></li>
-<li><a href="https://developer.valvesoftware.com/wiki/Dedicated_Servers_List" target="_blank" rel="noopener">steamcmd支持的专业服务器列表(英文)</a></li>
-<li><a href="http://blog.ttionya.com/article-1235.html" target="_blank" rel="noopener">饥荒联机独立服务器搭建教程（三）：配置篇</a></li>
-</ul>
-<p>先给steamcmd专门创建一个用户，虽然我不知道有没有这个必要，但是感觉全都用一个root账号并不好，独立开来也挺好的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ useradd -m steam</span><br><span class="line">$ cd &#x2F;home&#x2F;steam</span><br><span class="line">$ passwd steam</span><br></pre></td></tr></table></figure>
-
-<p>之后给新用户输入一个密码，之后切换到新建的用户安装steamcmd，通过apt安装理论上会自动安装依赖吧，如果没有自动安装的话请参照<a href="https://developer.valvesoftware.com/wiki/SteamCMD" target="_blank" rel="noopener">steamcmd怎么使用的官方教程(英文)</a>里的<code>Downloading SteamCMD - Linux - Manually</code>进行安装。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ su steam</span><br><span class="line">$ sudo apt install steamcmd</span><br><span class="line">$ ln -s &#x2F;usr&#x2F;games&#x2F;steamcmd steamcmd</span><br></pre></td></tr></table></figure>
-
-<p>上述最后一行我也不知道有没有必要惹，link一个快捷方式而已。之后直接启动steamcmd就可以了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ steamcmd</span><br><span class="line">Redirecting stderr to &#39;&#x2F;home&#x2F;steam&#x2F;.steam&#x2F;logs&#x2F;stderr.txt&#39;</span><br><span class="line">[  0%] Checking for available updates...</span><br><span class="line">[----] Verifying installation...</span><br><span class="line">Steam Console Client (c) Valve Corporation</span><br><span class="line">-- type &#39;quit&#39; to exit --</span><br><span class="line">Loading Steam API...OK.</span><br><span class="line"></span><br><span class="line">Steam&gt;</span><br></pre></td></tr></table></figure>
-
-<p>到了这里steam就已经成功启动了，然后我们要做的就是安装一下DST的专用服务器。首先登陆账号，跟着下面输入。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Steam&gt;login username</span><br><span class="line">... #第一次登录会要求输入密码，以及可能的话还会有验证码照着输入即可</span><br><span class="line">Logging in user &#39;loop_void&#39; to Steam Public ...</span><br><span class="line">Logged in OK</span><br><span class="line">Waiting for user info...OK</span><br><span class="line"></span><br><span class="line">Steam&gt;force_install_dir &#x2F;home&#x2F;steam&#x2F;steamapps&#x2F;DST</span><br><span class="line"></span><br><span class="line">Steam&gt;app_update 343050 validate</span><br><span class="line">... #然后就是漫长的下载了,这里的343050是饥荒专业服务器的id</span><br><span class="line"></span><br><span class="line">Steam&gt;quit</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
-
-<p>到这里服务器应该就已经安装好了，到steam的用户目录下应该已经可以看到这几个文件夹了，这个时候这个目录下应该还是没有.klei文件夹的，我当时按照别的教程纠结了半天我的.klei呢</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ ll</span><br><span class="line">...</span><br><span class="line">drwxrwxr-x 9 steam steam  4096 Aug 24 16:27 .steam&#x2F;</span><br><span class="line">drwxrwxr-x 3 steam steam  4096 Jul 29 14:33 steamapps&#x2F;</span><br><span class="line">lrwxrwxrwx 1 steam steam    19 Jul 12 20:47 steamcmd -&gt; &#x2F;usr&#x2F;games&#x2F;steamcmd*</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>之后继续…</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ cd &#x2F;steamapps&#x2F;DST&#x2F;bin</span><br><span class="line">$ .&#x2F;dontstarve_dedicated_server_nullrenderer</span><br></pre></td></tr></table></figure>
-
-<p>会开始刷屏，等到不动了直接 Ctrl+C 整个关掉，这个时候返回<code>/home/steam</code>可以看到已经多了一个<code>.klei</code>的目录了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ cd ~</span><br><span class="line">$ tree .klei&#x2F;</span><br><span class="line">.klei&#x2F;</span><br><span class="line">├── Agreements</span><br><span class="line">│   └── DoNotStarveTogether</span><br><span class="line">│       └── agreements.ini</span><br><span class="line">└── DoNotStarveTogether</span><br><span class="line">    └── Cluster_1</span><br><span class="line">        └── ...</span><br></pre></td></tr></table></figure>
-
-<p>到这里就已经成功了大半了，之后只需要把位置文件，用户token什么的都弄好放进同一个文件夹再放到<code>./klei/DoNotStarveTogether</code> 这个文件夹下面。这一部分可以参考 <a href="http://blog.ttionya.com/article-1235.html" target="_blank" rel="noopener">饥荒联机独立服务器搭建教程（三）：配置篇</a> 。</p>
-<p>其实这些配置并不需要自己一个一个的手动去配置，只需要本地游戏中创建世界，设定好你想要的mod和各种世界选项之后进入游戏，等世界创建完进入到选人界面之后直接退出，然后去<code>~\Documents\Klei\DoNotStarveTogether\steam_id</code>这个目录里面找到对应的Cluster_x；</p>
-<ul>
-<li>~对应的是系统用户的目录</li>
-<li>steam_id是创建世界用的steam账号的id，如果只用一个账号登陆过的话应该只会有一个数字作为名字的目录</li>
-<li>x就是创建世界的时候对应的第几个格子</li>
-</ul>
-<p>把那个文件夹复制出来，按照 <a href="http://blog.ttionya.com/article-1235.html" target="_blank" rel="noopener">饥荒联机独立服务器搭建教程（三）：配置篇</a> 内的方法把你的klei用户token放到<code>cluster_token.txt</code>里面即可。</p>
-<p>然后把整个文件夹都复制到服务器的<code>./klei/DoNotStarveTogether</code>内，服务器就配置就大致完成了。如果把原来生成的世界删掉打算在服务器上再次生成的话可以删除<code>Master</code>和<code>Caves</code>内的<code>saves</code>文件夹和一些别的东西，这个时候存档文件夹应该像这样。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ tree Cluster_1</span><br><span class="line">Cluster_1</span><br><span class="line">├── Caves</span><br><span class="line">│   ├── leveldataoverride.lua</span><br><span class="line">│   ├── modoverrides.lua</span><br><span class="line">│   └── server.ini</span><br><span class="line">├── cluster.ini</span><br><span class="line">├── cluster_token.txt</span><br><span class="line">└── Master</span><br><span class="line">    ├── leveldataoverride.lua</span><br><span class="line">    ├── modoverrides.lua</span><br><span class="line">    └── server.ini</span><br></pre></td></tr></table></figure>
-
-<p>如果打算把原来的存档也挪移到服务器上则不需要删除任何文件夹。 然后还需要把你的mod的id告诉服务器让服务器去下载这些mod，可以参照 <a href="http://blog.ttionya.com/article-1235.html" target="_blank" rel="noopener">饥荒联机独立服务器搭建教程（三）：配置篇</a> 中的 6、配置下载的 Mod 文件 ， <code>dedicated_server_mods_setup.lua</code> 在<code>/home/steam/steamapps/DST/mods</code>目录内。</p>
-<p>到这里配置都弄好了，只需要启动服务器就可以了。注意一定要切换到<code>dontstarve_dedicated_server_nullrenderer</code>所在的目录内去运行这个东西，不然会发生很快乐的事情。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ .&#x2F;dontstarve_dedicated_server_nullrenderer</span><br></pre></td></tr></table></figure>
-
-<p>即可，默认会运行Cluster_1这个存档中的Master世界，如果想要运行两个世界的话可以运行两次这个程序在后面分别添加参数<code>-shard Master</code>和<code>-shard Caves</code>,当然，同样可以添加参数<code>-cluster Cluster_x</code>来指定加载哪一个存档。</p>
-<p>你可能发现了当你运行了这个程序之后就不能再干别的事情了，Ctrl+C会直接中止服务器，这个时候可以考虑一下使用screen这个程序，如果服务器上没有screen则可以这么安装。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt install screen</span><br></pre></td></tr></table></figure>
-
-<p>然后该执行的代码就变成了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ screen -S &quot;DST Server Master&quot; .&#x2F;dontstarve_dedicated_server_nullrenderer -shard Master -cluster Cluster_1</span><br><span class="line">$ screen -S &quot;DST Server Caves&quot; .&#x2F;dontstarve_dedicated_server_nullrenderer -shard Caves -cluster Cluster_1</span><br></pre></td></tr></table></figure>
-
-<p>进入一个screen之后按Ctrl+A然后松开再按D即可返回，上面的两条命令中间就需要进行一次这个操作。执行完第二条命令之后也可以这么干把终端腾出来。</p>
-<p><code>screen -ls</code> 可以查看所有的在运行的screen,<code>screen -r id</code>可以回到某一个screen，如果只有一个运行中的screen则不需要输入id，id可以输入<code>screen -ls</code>看到正在运行的所有screen的id</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" data-id="ck5wn85tr0003qkux4xa2314z" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li></ul>
 
     </footer>
   </div>
@@ -1070,6 +1109,10 @@
       <ul>
         
           <li>
+            <a href="/2020/01/31/Laravel%E7%9A%84Eloquent/">Laravel的Eloquent</a>
+          </li>
+        
+          <li>
             <a href="/2020/01/27/ES6%E7%9A%84Proxy/">ES6的Proxy(一)</a>
           </li>
         
@@ -1083,10 +1126,6 @@
         
           <li>
             <a href="/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/">laravel的一点理解...?</a>
-          </li>
-        
-          <li>
-            <a href="/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/">ES6变量的解构赋值</a>
           </li>
         
       </ul>
