@@ -65,6 +65,66 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-整一个ipv6的网站" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" class="article-date">
+  <time datetime="2020-01-21T16:39:41.000Z" itemprop="datePublished">2020-01-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/">整一个ipv6的网站</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>学校的校园网支持ipv6呢，并且在没有经过认证的时候也可以直接访问纯ipv6的网站，比如ipv6.baidu.com，那么就给自己搭一个纯ipv6的网站来在校园网里面访问吧。</p>
+<p><img src="/images/make-ipv6-site/1.jpg" alt="img"></p>
+<p>要把网站弄成一个ipv6的站点，需要先给服务器分配一个ipv6的ip地址，有的vps可能支持创建实例的时候就enable-ipv6，但是我的不支持，没办法 只好手动配啦</p>
+<p>这里在 <strong><a href="https://www.tunnelbroker.net/" target="_blank" rel="noopener">Hurricane Electric</a></strong> 上面弄，注册一个账号并登陆之后，在左边的User Functions里找到第一个链接Create Regular Tunnel</p>
+<p><img src="/images/make-ipv6-site/2.png" alt="img"></p>
+<p>然后IPv4 Endpoint输入服务器的ip地址，在Available Tunnel Servers下面选择一个距离服务器机房最近的节点，然后跳到最下面点Create Tunnel，这里可能需要等待一段时间。</p>
+<p><img src="/images/make-ipv6-site/3.png" alt="img"></p>
+<p>等待一段时间后，页面会跳转到Tunnel Details，然后在下拉框选择Linux-net-tools，然后就会生成一段代码，在服务器终端逐条执行就可以了，执行完了之后在本地ping一下你的ipv6地址试试看是不是已经通啦。</p>
+<p><img src="/images/make-ipv6-site/4.png" alt="img"></p>
+<p>虽然延迟有些高，因为是国外的服务器，不过本来目的就不是为了打游戏这些对延迟要求高的东西。</p>
+<p>然后需要修改一下域名解析，我使用的是阿里云买的域名，需要添加一条AAAA类型的记录用来解析向一个ipv6的地址</p>
+<p><img src="/images/make-ipv6-site/5.png" alt="img"></p>
+<p>到这里前置的准备就差不多好了，可以尝试一下ping域名了。可以ping通之后就可以进行服务器端的设置了，ssh连接服务器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ lnmp ssl add</span><br></pre></td></tr></table></figure>
+
+<p>如果没有网站则用上面的命令创建一个网站，如果想把现有的网站修改成一个纯ipv6的网站则直接编辑现有网站的配置文件即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server</span><br><span class="line">    &#123;</span><br><span class="line">        listen [::]:80;</span><br><span class="line">        server_name domain.com;</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">server</span><br><span class="line">    &#123;</span><br><span class="line">        listen [::]:443 ssl;</span><br><span class="line">        server_name domain.com;</span><br><span class="line">        </span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键就在于listen后面的参数，当格式为<code>[::]:port</code>时nginx就是只监听ipv6。如果想要既监听ipv4又监听ipv6的话则需要同时写入 <code>listen [::]:port;</code> 和 <code>listen port;</code>，当然如果同时监听ipv4和ipv6的话就无法在不认证校园网的情况下访问了，除非客户端本地彻底禁用ipv4。 然后重载nginx。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service nginx reload</span><br></pre></td></tr></table></figure>
+
+<p>到这里大概是配置完成了，可以断开ssh连接了。回到本地断开校园网的认证尝试访问一下这个网站试试 2333</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" data-id="ck63r2dbc0008rjuxe6og8oyr" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Linux上的饥荒服务器搭建" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" class="article-date">
@@ -145,7 +205,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" data-id="ck621fc190003xhux5bjuanu1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" data-id="ck63r2db80003rjux2l4kg9b4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li></ul>
@@ -199,7 +259,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/21/hello-world/" data-id="ck621fc1b0005xhux6toscp83" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/21/hello-world/" data-id="ck63r2dba0005rjuxcw9w4323" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
@@ -248,7 +308,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li></ul>
     </div>
   </div>
 
@@ -259,6 +319,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2020/02/01/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%B8%80/">玩一玩ScriptOJ(一)</a>
+          </li>
         
           <li>
             <a href="/2020/01/31/Laravel%E7%9A%84Eloquent/">Laravel的Eloquent</a>
@@ -274,10 +338,6 @@
         
           <li>
             <a href="/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/">饥荒联机版mod开发摸鱼(一)</a>
-          </li>
-        
-          <li>
-            <a href="/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/">laravel的一点理解...?</a>
           </li>
         
       </ul>
