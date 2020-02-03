@@ -65,6 +65,100 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-ES6的this" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/03/ES6%E7%9A%84this/" class="article-date">
+  <time datetime="2020-02-03T12:29:37.000Z" itemprop="datePublished">2020-02-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/03/ES6%E7%9A%84this/">ES6的this</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>MDN:<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this" target="_blank" rel="noopener">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this</a>  </p>
+<p>js的function关键词定义函数体内的this指向在定义的时候是不确定的，只有在定义的函数被调用的时候才会赋予里面的this一个指向，而这this指向的是直接调用者。</p>
+<p>什么是直接调用者呢？比如我要调用a对象的b方法，那么这个时候b的直接调用者就是a，b内的this指向就是a。</p>
+<p>又比如我要调用a对象的b属性的c方法，那么c的直接调用者就是b。a通过b间接调用了c方法。</p>
+<p>算了，这么写着太乱了，直接举例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">x</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line">x(); <span class="comment">//window</span></span><br></pre></td></tr></table></figure>
+
+<p>直接使用函数的话则会指向全局对象，浏览器环境下是window。在node环境下则是global。</p>
+<p>而如果在strict模式下则会指向undefined</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a = &#123;</span><br><span class="line">    b : <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">a.b(); <span class="comment">//返回的是a对象</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a = &#123;</span><br><span class="line">    b : &#123;</span><br><span class="line">        c : <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">a.b.c(); <span class="comment">//返回的是b对象。</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a = &#123;</span><br><span class="line">    b : <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> c = a.b;</span><br><span class="line">c();  <span class="comment">//返回的是全局对象 window/global</span></span><br></pre></td></tr></table></figure>
+
+<p>最后一个虽然调用的函数还是定义在a里面的b，但是直接调用者其实还是全局对象，<code>let c = a.b</code>中把定义的函数赋值给了c。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>);</span><br><span class="line">&#125;,<span class="number">100</span>); <span class="comment">//window</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">x</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>);</span><br><span class="line">    &#125;,<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line">x(); <span class="comment">//window</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x = &#123;</span><br><span class="line">    y : <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="keyword">this</span>);</span><br><span class="line">        &#125;,<span class="number">100</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">x.y(); <span class="comment">//window</span></span><br></pre></td></tr></table></figure>
+
+<p>这里可以看出在setTimeout内使用function定义的闭包实际上都会由window来直接调用。</p>
+<p>然后还有一种情况就是new。</p>
+<p>js中通过function定义的方法其实都是一个Function的实例。</p>
+<p>比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Fn</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.x = <span class="string">'aaa'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = <span class="keyword">new</span> Fn();</span><br><span class="line"><span class="built_in">console</span>.log(x); <span class="comment">//Fn &#123;x: "aaa"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到在<code>Fn</code>中this的指向变成了他自自己，所以在尝试输出x的过程中有一个属性叫x，这个x是在<code>Fn()</code>内的<code>this.x = &#39;aaa&#39;</code>定义的。</p>
+<p>实际上在<code>let x = new Fn()</code>的过程中，new操作符改变了<code>Fn()</code>中this的指向，将他指向了新创建的对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Fn</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.x = <span class="string">'aaa'</span>;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        y : <span class="string">'bbb'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = <span class="keyword">new</span> Fn();</span><br><span class="line"><span class="built_in">console</span>.log(x); <span class="comment">//&#123;y: "bbb"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Fn</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.x = <span class="string">'aaa'</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'bbb'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = <span class="keyword">new</span> Fn();</span><br><span class="line"><span class="built_in">console</span>.log(x); <span class="comment">//Fn &#123;x: "aaa"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>至于这是为什么的话。。不太清楚(x，可能跟new有关，可能要另外写一篇。</p>
+<p>唔。。看了一下官方的文档：</p>
+<p>在箭头函数出现之前，每一个新函数根据它是被如何调用的来定义这个函数的this值：</p>
+<ul>
+<li>如果是该函数是一个构造函数，this指针指向一个新的对象</li>
+<li>在严格模式下的函数调用下，this指向undefined</li>
+<li>如果是该函数是一个对象的方法，则它的this指针指向这个对象</li>
+<li>等等</li>
+</ul>
+<hr>
+<p>然后function部分写完了就是箭头函数了，算是一种特殊的匿名函数。语法：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(parm) =&gt; &#123;</span><br><span class="line">    <span class="comment">//do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那么在匿名函数里面，this指向的是哪里呢？</p>
+<p>在<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank" rel="noopener">箭头函数</a>中，<code>this</code>与封闭词法环境的<code>this</code>保持一致。在全局代码中，它将被设置为全局对象</p>
+<p>什么叫封闭词法环境呢？我不明白</p>
+<p>我的理解就是箭头函数的this被设置为他被创建时的环境。他被创建的环境是y内的z。而z的this指向y，所以它的this也是y。</p>
+<p>比如下面的代码。我的箭头函数写在setTimeout()内，然后他的上一层对象应该是<code>x.y</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x = &#123;</span><br><span class="line">    y : &#123;</span><br><span class="line">     	z : <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="keyword">this</span>);</span><br><span class="line">            &#125;,<span class="number">100</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">x.y.z() <span class="comment">//返回的是y对象。</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>说实话，还是有些不太明白，这篇文章还需要经过修改(x</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/03/ES6%E7%9A%84this/" data-id="ck66iilzy00003vuxge64ah0l" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6/" rel="tag">ES6</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-玩一玩ScriptOJ-二" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/02/03/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%BA%8C/" class="article-date">
@@ -126,7 +220,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/02/03/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%BA%8C/" data-id="ck659svx6000nyhuxgu3ac1yl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/02/03/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%BA%8C/" data-id="ck66iim0b000f3vuxeaql8lbb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ScriptOJ/" rel="tag">ScriptOJ</a></li></ul>
@@ -274,7 +368,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/02/01/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%B8%80/" data-id="ck659svx10008yhux6ys601dq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/02/01/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%B8%80/" data-id="ck66iim0a000b3vux8yor0bmi" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ScriptOJ/" rel="tag">ScriptOJ</a></li></ul>
@@ -405,7 +499,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/31/Laravel%E7%9A%84Eloquent/" data-id="ck659svww0001yhuxaq8470z7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/31/Laravel%E7%9A%84Eloquent/" data-id="ck66iim0300013vuxaeuw7t74" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/" rel="tag">laravel</a></li></ul>
@@ -490,7 +584,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/27/ES6%E7%9A%84Proxy/" data-id="ck659svx10009yhux91czgk85" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/27/ES6%E7%9A%84Proxy/" data-id="ck66iim0g000n3vux6mwvaxtv" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6/" rel="tag">ES6</a></li></ul>
@@ -569,7 +663,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/" data-id="ck659svx4000gyhuxak256oy8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/" data-id="ck66iim0d000j3vuxc96a8wyf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%A5%A5%E8%8D%92/" rel="tag">饥荒</a></li></ul>
@@ -637,7 +731,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" data-id="ck659svx3000dyhuxfkebf8uk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/25/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%B8%80/" data-id="ck66iim0c000h3vuxgtssew1y" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%A5%A5%E8%8D%92/" rel="tag">饥荒</a></li></ul>
@@ -792,7 +886,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/" data-id="ck659svx00005yhux3nnb3d2g" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/24/laravel%E7%9A%84%E4%B8%80%E7%82%B9%E7%90%86%E8%A7%A3/" data-id="ck66iim0800083vux218d620w" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li></ul>
@@ -916,7 +1010,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/" data-id="ck659svwr0000yhuxfao8au3w" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/" data-id="ck66iim0f000l3vux67lbhgsq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6/" rel="tag">ES6</a></li></ul>
@@ -970,166 +1064,10 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/" data-id="ck659svx6000myhuxceezbxr9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/" data-id="ck66iim0900093vux2xgo7lvc" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-用树莓派搭一个路由器" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" class="article-date">
-  <time datetime="2020-01-21T16:50:47.000Z" itemprop="datePublished">2020-01-22</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/">用树莓派搭一个路由器</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="为什么要干这个"><a href="#为什么要干这个" class="headerlink" title="为什么要干这个"></a>为什么要干这个</h3><p>学校的校园网是真的憨憨，虽然这个学期支持多端同时在线了 而且是按时计费，不过发现我电脑手机同时上线之后我的网费扣得有点不能接受了。</p>
-<p><img src="/images/raspberry-build-router/1.jpg" alt="img"></p>
-<p>本来打算是电脑开开热点算了，后来觉得我可以整一点更优秀的操作，后来买了一个路由器，但是路由器好像并没有那么好用，校园网是需要登录的，然而路由器该怎么登录呢。这个路由器特别憨憨，内存单位用M算的话就是个位数，处理器也是十分的，固件都刷不了。</p>
-<p>然后淘宝了一波，想要找到一个可以刷固件的路由器，然后被价格所击退。后来google了一波发现了一个用树莓派搭建透明代理的教程，我寻思着：树莓派？好像听说过欸，然后百度一下，淘宝一下，哟，买！</p>
-<p>正好可以玩一玩linux系统，听起来是挺优秀的，而且耗电发热什么的相对也没那么夸张，还能搭个内网网站给舍友发发福利，搭个本地游戏服务器什么的。</p>
-<p>这篇文章主要记录一下我是怎么用树莓派来搭建一个路由器的。应该也适用其其他的有无线网卡的linux设备。</p>
-<h3 id="前置部分"><a href="#前置部分" class="headerlink" title="前置部分"></a>前置部分</h3><p>环境：</p>
-<ul>
-<li>设备： Raspberry Pi 4 Model B 4GB RAM</li>
-<li>系统： 2019-07-10-raspbian-buster</li>
-</ul>
-<p>参考文章：</p>
-<ul>
-<li><a href="https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md" target="_blank" rel="noopener">Setting up a Raspberry Pi as a Wireless Access Point – Raspberry Pi Documentation</a></li>
-</ul>
-<p>首先安装 dnsmasq 和 hostapd</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt install dnsmasq hostapd</span><br></pre></td></tr></table></figure>
-
-<p>其中dnsmasq的作用是作为一个小型的DHCP服务器，用来给接入热点的设备分配局域网ip地址，而hostapd则是把设备变成热点的程序。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service dnsmasq stop</span><br><span class="line">$ sudo service hostapd stop</span><br></pre></td></tr></table></figure>
-
-<p>安装完之后还没有弄配置文件什么的，先关掉。之后开始折腾配置文件</p>
-<h3 id="配置部分"><a href="#配置部分" class="headerlink" title="配置部分"></a>配置部分</h3><h4 id="1-dhcpcd-conf"><a href="#1-dhcpcd-conf" class="headerlink" title="1. dhcpcd.conf"></a>1. dhcpcd.conf</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vi &#x2F;etc&#x2F;dhcpcd.conf</span><br></pre></td></tr></table></figure>
-
-<p>编辑<code>/etc/dhcpcd.conf</code>文件，在文件的末尾添加</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">interface wlan0</span><br><span class="line">    static ip_address&#x3D;192.168.0.1&#x2F;24</span><br><span class="line">    nohook wpa_supplicant</span><br></pre></td></tr></table></figure>
-
-<p>如果不用外置的网卡的话，会用树莓派本身自带的无线模块来充当热点发射的设备，所以是热点是在默认的wlan0上的。添加的配置的意思如下</p>
-<ul>
-<li>interface wlan0 #指定一个具体的设备</li>
-<li>static ip_address=192.168.0.1/24 #指定该设备的固定ipv4为192.168.0.1</li>
-<li>nohook wpa_supplicant #移到这里查看</li>
-</ul>
-<p>更多配置可以查阅 <a href="https://wiki.archlinux.org/index.php/Dhcpcd_(简体中文)" target="_blank" rel="noopener">dhcpcd 配置</a> 。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service dhcpcd restart</span><br></pre></td></tr></table></figure>
-
-<p>配置完成之后重启dhcpcd服务。</p>
-<h4 id="2-dnsmasq-conf"><a href="#2-dnsmasq-conf" class="headerlink" title="2. dnsmasq.conf"></a>2. dnsmasq.conf</h4><p>前面说到我们会用dnsmasq来充当dhcp服务器，现在就来配置这个东西。由于安装这个的时候就会自带一个配置文件，位置在<code>/etc/dnsmasq.conf</code>，这个文件里面有很详细的解释，这里我们从头开始更改，但是为了方便以后有需要可以查看配置的详解，不删除原来的文件。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mv &#x2F;etc&#x2F;dnsmasq.conf &#x2F;etc&#x2F;dnsmasq.conf.bak</span><br><span class="line">$ sudo vi &#x2F;etc&#x2F;dnsmasq.conf</span><br></pre></td></tr></table></figure>
-
-<p>在新建的<code>dnsmasq.conf</code>配置文件中加入配置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">interface&#x3D;wlan0</span><br><span class="line">dhcp-range&#x3D;192.168.0.1,192.168.0.200,255.255.255.0,24h</span><br></pre></td></tr></table></figure>
-
-<h5 id="添加的配置的意思如下"><a href="#添加的配置的意思如下" class="headerlink" title="添加的配置的意思如下"></a>添加的配置的意思如下</h5><ul>
-<li>interface=wlan0 指定需要dhcp分配地址的设备</li>
-<li>dhcp-range=192.168.0.1,192.168.0.200,255.255.255.0,24h<ul>
-<li>192.168.0.1 #指定IP地址分配的开头</li>
-<li>192.168.0.200 #指定IP地址分配的结尾</li>
-<li>255.255.255.0 #指定子网掩码</li>
-<li>24h #指定DHCP租约持续时间</li>
-</ul>
-</li>
-</ul>
-<p><strong>需要注意的是，</strong><code>**dhcp-range**</code><strong>必须包含之前</strong><code>**/etc/dhcpcd.conf**</code><strong>中配置的静态ip地址，不然不能分配ip地址，dhcp服务会报错。</strong></p>
-<p>需要查看详细的配置解释可以看原来的<code>dnsmasq.conf</code>文件，以及中文的话可以看这个<a href="https://www.cnblogs.com/sunsky303/p/9238669.html" target="_blank" rel="noopener">dnsmasq详解&amp;手册</a>。</p>
-<h4 id="3-hostapd-conf"><a href="#3-hostapd-conf" class="headerlink" title="3. hostapd.conf"></a>3. hostapd.conf</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vi &#x2F;etc&#x2F;hostapd&#x2F;hostapd.conf</span><br></pre></td></tr></table></figure>
-
-<p>你会打开一个新的文件，不用担心，hostapd安装之后不会生成默认的配置文件，只会生成一个空文件夹。在这个文件根据需要里面加入内容</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">interface&#x3D;wlan0</span><br><span class="line">driver&#x3D;nl80211</span><br><span class="line">ssid&#x3D;name</span><br><span class="line">hw_mode&#x3D;g</span><br><span class="line">channel&#x3D;7</span><br><span class="line">wmm_enabled&#x3D;0</span><br><span class="line">macaddr_acl&#x3D;0</span><br><span class="line">auth_algs&#x3D;1</span><br><span class="line">ignore_broadcast_ssid&#x3D;0</span><br><span class="line">wpa&#x3D;2</span><br><span class="line">wpa_passphrase&#x3D;password</span><br><span class="line">wpa_key_mgmt&#x3D;WPA-PSK</span><br><span class="line">wpa_pairwise&#x3D;TKIP</span><br><span class="line">rsn_pairwise&#x3D;CCMP</span><br></pre></td></tr></table></figure>
-
-<h5 id="配置的意义"><a href="#配置的意义" class="headerlink" title="配置的意义"></a>配置的意义</h5><ul>
-<li>interface=wlan0 #使用的网卡</li>
-<li>driver=nl80211 #这项配置在wiki上并没有给出，但是在树莓派文档有，默认值会使hostapd，应该是可填可不填的。</li>
-<li>ssid=name #开的wifi的名字</li>
-<li>hw_mode=g #操作模式，g意味着2.4GHz频段，如果需要5G频段可以改成a，2.4G和5G区别可以看<a href="https://baijiahao.baidu.com/s?id=1630434773962356693" target="_blank" rel="noopener">这里</a>，若是用5G需要相应改动channel。</li>
-<li>channel=7 #使用的信道，可以看 <a href="https://zh.wikipedia.org/wiki/WLAN信道列表" target="_blank" rel="noopener">WLAN信道列表 – 维基百科</a></li>
-<li>wmm_enabled=0 #跟wmm有关，这里似乎是关闭了wmm support，不是很清楚，具体可以看 WMM的<a href="https://baike.baidu.com/item/WMM" target="_blank" rel="noopener">百度百科</a>和下面的详细配置文档</li>
-<li>macaddr_acl=0 #基于MAC地址的身份验证 翻译是这样的(默认值似乎就是0，意味着允许所有设备除非其在黑名单上。</li>
-<li>auth_algs=1 #IEEE 802.11规定了两种身份验证算法，这个设置可以用于配置仅允许其中之一还是同时开放，1意味着同时开放。</li>
-<li>ignore_broadcast_ssid=0 #原文看这里，默认是0，意思应该是设置为0是可以被发现，否则需要设备指定ssid再尝试连接不能直接搜索到？</li>
-<li>wpa=2 #使用WPA3</li>
-<li>wpa_passphrase=password #wifi密码</li>
-<li>wpa_key_mgmt=WPA-PSK #密钥管理算法</li>
-<li>wpa_pairwise=TKIP #应该不重要吧，可以自己看配置文档，我有点不知道是干什么的，下面这项配置同样。</li>
-<li>rsn_pairwise=CCMP</li>
-</ul>
-<p>关于hostapd，可以查阅以下资料</p>
-<ul>
-<li><a href="https://w1.fi/cgit/hostap/plain/hostapd/hostapd.conf" target="_blank" rel="noopener">详细的配置文档(英文)</a></li>
-<li><a href="https://blog.csdn.net/hinyunsin/article/details/6029663" target="_blank" rel="noopener">Linux下软AP功能之Hostapd介绍</a></li>
-<li><a href="https://wiki.gentoo.org/wiki/Hostapd" target="_blank" rel="noopener">Hostapd – Gentoo Wiki</a></li>
-</ul>
-<p>到这里hostapd的配置文件也写完了。但是这个文件是我们自己创建的，我们需要告诉hostapd使用这个配置文件，打开<code>/etc/default/hostapd</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vi &#x2F;etc&#x2F;default&#x2F;hostapd</span><br></pre></td></tr></table></figure>
-
-<p>找到<code>DAEMON_CONF</code>的设定，取消注释，并且把值改成新建配置文件的路径。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DAEMON_CONF&#x3D;&quot;&#x2F;etc&#x2F;hostapd&#x2F;hostapd.conf&quot;</span><br></pre></td></tr></table></figure>
-
-<h4 id="4-etc-sysctl-conf"><a href="#4-etc-sysctl-conf" class="headerlink" title="4. /etc/sysctl.conf"></a>4. /etc/sysctl.conf</h4><p>出于安全考虑，Linux系统默认是禁止数据包转发的。所谓转发即当主机拥有多于一块的网卡时，其中一块收到数据包，根据数据包的目的ip地址将数据包发往本机另一块网卡，该网卡根据路由表继续发送数据包。这通常是路由器所要实现的功能。</p>
-<p>要让Linux系统具有路由转发功能，需要配置一个Linux的内核参数<code>net.ipv4.ip_forward</code>。这个参数指定了Linux系统当前对路由转发功能的支持情况。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vi &#x2F;etc&#x2F;sysctl.conf</span><br></pre></td></tr></table></figure>
-
-<p>然后找到 net.ipv4.ip_forward 行，取消注释并把值改为1，保存退出。执行</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo sysctl -p</span><br></pre></td></tr></table></figure>
-
-<p>应用更改。</p>
-<h4 id="5-iptables"><a href="#5-iptables" class="headerlink" title="5. iptables"></a>5. iptables</h4><p>添加数据包伪装。这里的作用可以看一看这里 <a href="https://blog.csdn.net/tycoon1988/article/details/40781291" target="_blank" rel="noopener">https://blog.csdn.net/tycoon1988/article/details/40781291</a></p>
-<p>这段代码是操作iptables，添加一条伪装的规则进入iptables</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo iptables -t nat -A  POSTROUTING -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
-
-<p>然后执行，这里的作用是把当前系统的iptables存入<code>/etc/iptables.ipv4.nat</code>文件中，方便之后从中直接取出快速配置。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo sh -c &quot;iptables-save &gt; &#x2F;etc&#x2F;iptables.ipv4.nat&quot;</span><br></pre></td></tr></table></figure>
-
-<p>编辑<code>/etc/rc.local</code>并在<code>exit 0</code>上方添加它以在引导时安装这些规则。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables-restore &lt; &#x2F;etc&#x2F;iptables.ipv4.nat</span><br></pre></td></tr></table></figure>
-
-<p>然后配置部分到此结束。</p>
-<h3 id="可以启动啦"><a href="#可以启动啦" class="headerlink" title="可以启动啦"></a>可以启动啦</h3><p>直接启动hostapd可能会报错说被mask。这个时候需要unmask处理一下。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl unmask hostapd</span><br></pre></td></tr></table></figure>
-
-<p>然后启动两个服务并且enable使其开机自启，当然可以单纯的start而不enable</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl start hostapd</span><br><span class="line">$ sudo systemctl start dnsmasq</span><br></pre></td></tr></table></figure>
-
-<p>手机打开wifi看看是不是能搜到你的热点了，如果不行就</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service hostapd status</span><br><span class="line">$ sudo service dnsmasq status</span><br></pre></td></tr></table></figure>
-
-<p>看看出了什么问题，很大概率是配置文件的锅。</p>
-<p>这篇文章大概就到这里了，然后就可以玩玩别的操作了。内网穿透，搭内网资源站，透明代理什么的。嗯有空再写</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" data-id="ck659svx2000byhuxaxl27e8c" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
 
     </footer>
   </div>
@@ -1166,7 +1104,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/ES6/" style="font-size: 15px;">ES6</a> <a href="/tags/ScriptOJ/" style="font-size: 15px;">ScriptOJ</a> <a href="/tags/laravel/" style="font-size: 10px;">laravel</a> <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 10px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a> <a href="/tags/%E9%A5%A5%E8%8D%92/" style="font-size: 15px;">饥荒</a>
+      <a href="/tags/ES6/" style="font-size: 20px;">ES6</a> <a href="/tags/ScriptOJ/" style="font-size: 15px;">ScriptOJ</a> <a href="/tags/laravel/" style="font-size: 10px;">laravel</a> <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 10px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a> <a href="/tags/%E9%A5%A5%E8%8D%92/" style="font-size: 15px;">饥荒</a>
     </div>
   </div>
 
@@ -1188,6 +1126,10 @@
       <ul>
         
           <li>
+            <a href="/2020/02/03/ES6%E7%9A%84this/">ES6的this</a>
+          </li>
+        
+          <li>
             <a href="/2020/02/03/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%BA%8C/">玩一玩ScriptOJ(二)</a>
           </li>
         
@@ -1201,10 +1143,6 @@
         
           <li>
             <a href="/2020/01/27/ES6%E7%9A%84Proxy/">ES6的Proxy(一)</a>
-          </li>
-        
-          <li>
-            <a href="/2020/01/26/%E9%A5%A5%E8%8D%92%E8%81%94%E6%9C%BA%E7%89%88mod%E5%BC%80%E5%8F%91%E6%91%B8%E9%B1%BC-%E4%BA%8C/">饥荒联机版mod开发摸鱼(二)</a>
           </li>
         
       </ul>
