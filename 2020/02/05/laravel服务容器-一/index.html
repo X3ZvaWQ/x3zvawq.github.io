@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>laravel服务容器(一) | X3ZvaWQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="laravel用了也挺久的了，曾经也想过深入研究读读源码什么的，但是尝试过几次都从心了。 正好寒假无聊得慌，然后就准备深入一点琢磨一下。 从服务容器开始(x 当初看laravel中文文档的时候，开头就是核心架构里面的服务容器什么的，把自己给怼自闭了 所以后来也没成功弄懂，后来倒是写过一次IoC的实例。但是到现在也忘光了(x  依赖注入和控制反转是对同一件事情的不同描述，它们描述的角度不同。  依赖">
+<meta property="og:type" content="article">
+<meta property="og:title" content="laravel服务容器(一)">
+<meta property="og:url" content="http://yoursite.com/2020/02/05/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%B8%80/index.html">
+<meta property="og:site_name" content="X3ZvaWQ">
+<meta property="og:description" content="laravel用了也挺久的了，曾经也想过深入研究读读源码什么的，但是尝试过几次都从心了。 正好寒假无聊得慌，然后就准备深入一点琢磨一下。 从服务容器开始(x 当初看laravel中文文档的时候，开头就是核心架构里面的服务容器什么的，把自己给怼自闭了 所以后来也没成功弄懂，后来倒是写过一次IoC的实例。但是到现在也忘光了(x  依赖注入和控制反转是对同一件事情的不同描述，它们描述的角度不同。  依赖">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-05T10:29:44.000Z">
+<meta property="article:modified_time" content="2020-02-06T11:02:21.873Z">
+<meta property="article:author" content="X3ZvaWQ">
+<meta property="article:tag" content="laravel">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="X3ZvaWQ" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">X3ZvaWQ</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-laravel服务容器-一" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/05/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%B8%80/" class="article-date">
+  <time datetime="2020-02-05T10:29:44.000Z" itemprop="datePublished">2020-02-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      laravel服务容器(一)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>laravel用了也挺久的了，曾经也想过深入研究读读源码什么的，但是尝试过几次都从心了。</p>
+<p>正好寒假无聊得慌，然后就准备深入一点琢磨一下。</p>
+<p>从服务容器开始(x 当初看laravel中文文档的时候，开头就是核心架构里面的服务容器什么的，把自己给怼自闭了</p>
+<p>所以后来也没成功弄懂，后来倒是写过一次<code>IoC</code>的实例。但是到现在也忘光了(x</p>
+<blockquote>
+<p>依赖注入和控制反转是对同一件事情的不同描述，它们描述的角度不同。</p>
+<ul>
+<li>依赖注入是从应用程序的角度在描述，应用程序依赖容器创建并注入它所需要的外部资源。</li>
+<li>控制反转是从容器的角度在描述，容器控制应用程序，由容器反向的向应用程序注入应用程序所需要的外部资源。</li>
+</ul>
+</blockquote>
+<p>这个可能并不一定看的太懂，但是之所以要使用这一种模式关键还是为了解耦。</p>
+<hr>
+<h2 id="0-常规操作"><a href="#0-常规操作" class="headerlink" title="#0 常规操作"></a>#0 常规操作</h2><p>面向对象的程序开发离不开类、接口、对象这些东西。然后万物皆对象，房子可以是一个对象，人也是可以是一个对象，那么人在房子里。这两个对象就扯上关系了，他们之间就存在着一个依赖。</p>
+<p>就用上面的例子，房子，人这个时候可能会这么写：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $name;</span><br><span class="line">    <span class="keyword">protected</span> $age;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($name,$age)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = $name;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;age = $age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">House</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $human;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;human = <span class="keyword">new</span> Human(<span class="string">'咕咕咕'</span>, <span class="number">18</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于小型项目寥寥几个类这样的依赖并不会发生什么不愉悦的事情，就算业务发生变化有什么需要修改的事情也只需要修改寥寥几个地方。比如在上面的地方只有在House类的内部有一个<code>new People</code>。</p>
+<p>但是如果一个项目大了起来，类开始多了起来，然后依赖变得复杂起来。从一对一变成一对多甚至多对多的时候就是噩梦一般的体验了。比如：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $name;</span><br><span class="line">    <span class="keyword">protected</span> $age;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($name,$age)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = $name;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;age = $age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $name;</span><br><span class="line">    <span class="keyword">protected</span> $age;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($name,$age)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = $name;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;age = $age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cat</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $name;</span><br><span class="line">    <span class="keyword">protected</span> $age;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($name,$age)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = $name;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;age = $age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">House</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $human;</span><br><span class="line">    <span class="keyword">protected</span> $dog;</span><br><span class="line">    <span class="keyword">protected</span> $cat;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;human = <span class="keyword">new</span> Human(<span class="string">'咕咕咕'</span>, <span class="number">18</span>);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;dog = <span class="keyword">new</span> Dog(<span class="string">'汪汪汪'</span>, <span class="number">2</span>);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;cat = <span class="keyword">new</span> Cat(<span class="string">'喵喵喵'</span>, <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-工厂模式-Factory-Pattern"><a href="#1-工厂模式-Factory-Pattern" class="headerlink" title="#1 工厂模式 Factory Pattern"></a>#1 工厂模式 Factory Pattern</h2><p>在上面的代码中，如果Cat类的构造函数，或者类名什么的发生了变化，那么就需要修改House的代码，可能发感觉不到什么，那么如果有其他的东西也对猫有依赖呢？比如有一个<code>CatHouse</code>类，有一个<code>CatClimb</code>类，或者更多？那么是不是意味着修改一个Cat一个构造函数就需要修改多个类？这将会是多么糟糕的体验？</p>
+<p>所以为了避免这种事情，后来就有人提出了工厂模式，什么叫工厂模式呢？Show code。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BiologyFactory</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">make</span><span class="params">($type, $options)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> ($type) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'human'</span> : <span class="keyword">return</span> <span class="keyword">new</span> Human($options[<span class="number">0</span>], $options[<span class="number">1</span>]);</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'dog'</span> : <span class="keyword">return</span> <span class="keyword">new</span> Dog($options[<span class="number">0</span>], $options[<span class="number">1</span>]);</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'cat'</span> : <span class="keyword">return</span> <span class="keyword">new</span> Cat($options[<span class="number">0</span>], $options[<span class="number">1</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后呢，房子类就可以这么写了：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">House</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> members;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($members)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        $factory = <span class="keyword">new</span> BiologyFactory;</span><br><span class="line">        <span class="keyword">foreach</span>($members <span class="keyword">as</span> $member =&gt; $options)&#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;members[] = $factory-&gt;make($member, $options);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>试想，当我们这么操作之后，如果我们修改了Cat类，Dog类还需要修改House类的代码嘛，很明显是不需要的。又如同我们之前说的如果又多个类同时依赖Cat类，我们修改了Cat类的构造方法也再无必要去修改多个依赖了他的类，我们需要做的只有修改工厂类即可。</p>
+<p>在这个过程中，我们相当于在一对多或者对多对的依赖中添加了一层工厂，原本类直接对类产生依赖，现在我们在类与类之间添加了一个工厂，让类依赖工厂，通过工厂来获取原来依赖的对象。这么一来是不是舒服很多了呢？</p>
+<p>然而人们追求优雅的脚步是永无止尽的，既然可以做到像上面的类只需要依赖一个类，那么有没有可能做到完全的解耦呢？不管怎么修改我们都不需要去修改类的代码。</p>
+<p>比如我们现在如果修改了Cat类，我们只需要修改工厂类的代码即可，那么有没有可能不需要修改工厂类的代码呢？再或者说，如果添加了更多的生物类我们就需要去修改工厂类的代码为switch添加更多的case。有没有可能不修改类的代码而是通过其他的方法来实现呢？</p>
+<p>以及，这样的工厂真的就是最优雅的了吗？如果同一个生物有不同的构造方法，那么该怎么处理呢？是不是同一个类需要多个case来进行处理呢？这是不是意味着工厂生产东西的对象类型有些单一了呢？</p>
+<p>所以，上述的问题都会被解决。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/05/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%B8%80/" data-id="ck6amtdjd000axfuxgvl1ea1o" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/" rel="tag">laravel</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/02/03/ES6%E7%9A%84this/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">ES6的this</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ES6/" rel="tag">ES6</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ScriptOJ/" rel="tag">ScriptOJ</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/" rel="tag">laravel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" rel="tag">每日一摸</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%A5%A5%E8%8D%92/" rel="tag">饥荒</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/ES6/" style="font-size: 20px;">ES6</a> <a href="/tags/ScriptOJ/" style="font-size: 15px;">ScriptOJ</a> <a href="/tags/laravel/" style="font-size: 15px;">laravel</a> <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 10px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a> <a href="/tags/%E9%A5%A5%E8%8D%92/" style="font-size: 15px;">饥荒</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/02/05/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%B8%80/">laravel服务容器(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/02/03/ES6%E7%9A%84this/">ES6的this</a>
+          </li>
+        
+          <li>
+            <a href="/2020/02/03/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%BA%8C/">玩一玩ScriptOJ(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/02/01/%E7%8E%A9%E4%B8%80%E7%8E%A9ScriptOJ-%E4%B8%80/">玩一玩ScriptOJ(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/31/Laravel%E7%9A%84Eloquent/">Laravel的Eloquent</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 X3ZvaWQ<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

@@ -65,6 +65,60 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-雨中冒险2-拾取装备的详细描述修改" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/" class="article-date">
+  <time datetime="2020-01-21T16:52:37.000Z" itemprop="datePublished">2020-01-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/">雨中冒险2-拾取装备的详细描述修改</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近沉迷雨中冒险2，然后发现别人玩的时候捡道具的显示为什么都那么详细呢(于是我就去找了一下相关的mod，后来发现原来只是简单的改语言文件就可以了。考虑到刚有一个大版本更新，多了不少道具原来的语言文件覆盖了可能会炸，于是就自己动手丰衣足食啦。</p>
+<p><img src="/images/rain-of-risk-item-describe/1.png" alt="img"></p>
+<p>语言文件的目录位于(steam为steam安装目录。)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;steam&#125;\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Language\zh-CN</span><br></pre></td></tr></table></figure>
+
+<p>下面的json文件就是了，以及有一个txt文件目测可以用来修改字体。原字体看着挺舒服的我就没有琢磨了。</p>
+<p>打开那个json之后，<strong>正则替换执行下面的正则表达式</strong>即可。</p>
+<p>注意空格什么的一定要对，替换完之后要注意观察跟原来有没有不同，比如逗号后面多空格也会导致载入失败好像。我就踩过这个坑。</p>
+<h4 id="1-被动道具的描述"><a href="#1-被动道具的描述" class="headerlink" title="1.被动道具的描述"></a>1.被动道具的描述</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;ITEM_([A-Z]+)_PICKUP&quot; : &quot;(.+)&quot;,\n  &quot;ITEM_([A-Z]+)_DESC&quot; : &quot;(.+)&quot;,</span><br></pre></td></tr></table></figure>
+
+<p>替换为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;ITEM_$1_PICKUP&quot; : &quot;$4&quot;,\n  &quot;ITEM_$3_DESC&quot; : &quot;$4&quot;,</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-主动装备的描述"><a href="#2-主动装备的描述" class="headerlink" title="2.主动装备的描述"></a>2.主动装备的描述</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;EQUIPMENT_([A-Z]+)_PICKUP&quot; : &quot;(.+)&quot;,\n  &quot;EQUIPMENT_([A-Z]+)_DESC&quot; : &quot;(.+)&quot;,</span><br></pre></td></tr></table></figure>
+
+<p>替换为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;EQUIPMENT_$1_PICKUP&quot; : &quot;$4&quot;,\n  &quot;EQUIPMENT_$3_DESC&quot; : &quot;$4&quot;,</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/01/22/%E9%9B%A8%E4%B8%AD%E5%86%92%E9%99%A92-%E6%8B%BE%E5%8F%96%E8%A3%85%E5%A4%87%E7%9A%84%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%BF%AE%E6%94%B9/" data-id="ck6amtdjh000nxfux817t5nx3" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-用树莓派搭一个路由器" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" class="article-date">
@@ -209,7 +263,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" data-id="ck66iim0a000d3vuxb2p9h83e" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E4%B8%80%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8/" data-id="ck6amtdk90014xfuxe5fw3ip6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
@@ -291,7 +345,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/" data-id="ck66iim0600043vux6zlxg46a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/v2ray%E7%9A%84WebSocket-TLS-Web/" data-id="ck6amtdja0005xfux0v714qi7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
@@ -351,7 +405,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" data-id="ck66iim0700053vux8klz216w" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/%E6%95%B4%E4%B8%80%E4%B8%AAipv6%E7%9A%84%E7%BD%91%E7%AB%99/" data-id="ck6amtdjf000gxfuxhbl1cpp3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="tag">踩坑记录</a></li></ul>
@@ -443,7 +497,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" data-id="ck66iim0g000p3vux77abfemf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/22/Linux%E4%B8%8A%E7%9A%84%E9%A5%A5%E8%8D%92%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" data-id="ck6amtdje000dxfux4k202n73" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a></li></ul>
@@ -497,7 +551,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/01/21/hello-world/" data-id="ck66iim0600033vux7w4c9lvo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/01/21/hello-world/" data-id="ck6amtdje000exfuxg5no9ln0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
@@ -537,7 +591,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/ES6/" style="font-size: 20px;">ES6</a> <a href="/tags/ScriptOJ/" style="font-size: 15px;">ScriptOJ</a> <a href="/tags/laravel/" style="font-size: 10px;">laravel</a> <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 10px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a> <a href="/tags/%E9%A5%A5%E8%8D%92/" style="font-size: 15px;">饥荒</a>
+      <a href="/tags/ES6/" style="font-size: 20px;">ES6</a> <a href="/tags/ScriptOJ/" style="font-size: 15px;">ScriptOJ</a> <a href="/tags/laravel/" style="font-size: 15px;">laravel</a> <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E6%91%B8/" style="font-size: 10px;">每日一摸</a> <a href="/tags/%E6%B8%B8%E6%88%8F/" style="font-size: 15px;">游戏</a> <a href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" style="font-size: 20px;">踩坑记录</a> <a href="/tags/%E9%97%B2%E8%B0%88/" style="font-size: 10px;">闲谈</a> <a href="/tags/%E9%A5%A5%E8%8D%92/" style="font-size: 15px;">饥荒</a>
     </div>
   </div>
 
@@ -559,6 +613,10 @@
       <ul>
         
           <li>
+            <a href="/2020/02/05/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%B8%80/">laravel服务容器(一)</a>
+          </li>
+        
+          <li>
             <a href="/2020/02/03/ES6%E7%9A%84this/">ES6的this</a>
           </li>
         
@@ -572,10 +630,6 @@
         
           <li>
             <a href="/2020/01/31/Laravel%E7%9A%84Eloquent/">Laravel的Eloquent</a>
-          </li>
-        
-          <li>
-            <a href="/2020/01/27/ES6%E7%9A%84Proxy/">ES6的Proxy(一)</a>
           </li>
         
       </ul>
