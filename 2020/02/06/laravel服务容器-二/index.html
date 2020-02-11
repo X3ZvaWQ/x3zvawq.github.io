@@ -5,15 +5,19 @@
   
 
   
-  <title>Tag: ES6 | X3ZvaWQ</title>
+  <title>laravel服务容器(二) | X3ZvaWQ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="X3ZvaWQ">
-<meta property="og:url" content="http://yoursite.com/tags/ES6/index.html">
+  <meta name="description" content="#2 依赖注入 Dependency Injection类对类存在依赖，我们希望的是解耦，即修改一个类的代码不需要去改动其他类的代码，在前面的工厂模式中已经很接近完成这个目标了，无论怎么修改类的代码我们都只需要修改工厂类的代码即可完成适配。 类对类存在依赖，实际上就是在这个类里面我们会需要一个一个类的实例来干一些事情，那么除了在自己的内部产生还有没有别的办法来获得一个对象呢？有的，正如#2的标题所">
+<meta property="og:type" content="article">
+<meta property="og:title" content="laravel服务容器(二)">
+<meta property="og:url" content="http://yoursite.com/2020/02/06/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%BA%8C/index.html">
 <meta property="og:site_name" content="X3ZvaWQ">
+<meta property="og:description" content="#2 依赖注入 Dependency Injection类对类存在依赖，我们希望的是解耦，即修改一个类的代码不需要去改动其他类的代码，在前面的工厂模式中已经很接近完成这个目标了，无论怎么修改类的代码我们都只需要修改工厂类的代码即可完成适配。 类对类存在依赖，实际上就是在这个类里面我们会需要一个一个类的实例来干一些事情，那么除了在自己的内部产生还有没有别的办法来获得一个对象呢？有的，正如#2的标题所">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-06T11:04:37.000Z">
+<meta property="article:modified_time" content="2020-02-11T14:56:17.348Z">
 <meta property="article:author" content="X3ZvaWQ">
-<meta property="article:tag" content="咕咕咕">
+<meta property="article:tag" content="laravel">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="X3ZvaWQ" type="application/atom+xml">
@@ -63,78 +67,68 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/02/03/ES6%E7%9A%84this/" class="archive-article-date">
-  <time datetime="2020-02-03T12:29:37.000Z" itemprop="datePublished">2月 3</time>
+        <section id="main"><article id="post-laravel服务容器-二" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/06/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%BA%8C/" class="article-date">
+  <time datetime="2020-02-06T11:04:37.000Z" itemprop="datePublished">2020-02-06</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/02/03/ES6%E7%9A%84this/">ES6的this</a>
+    <h1 class="article-title" itemprop="name">
+      laravel服务容器(二)
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/01/27/ES6%E7%9A%84Proxy/" class="archive-article-date">
-  <time datetime="2020-01-27T15:28:26.000Z" itemprop="datePublished">1月 27</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/01/27/ES6%E7%9A%84Proxy/">ES6的Proxy(一)</a>
-    </h1>
-  
+        <h2 id="2-依赖注入-Dependency-Injection"><a href="#2-依赖注入-Dependency-Injection" class="headerlink" title="#2 依赖注入 Dependency Injection"></a>#2 依赖注入 Dependency Injection</h2><p>类对类存在依赖，我们希望的是解耦，即修改一个类的代码不需要去改动其他类的代码，在前面的工厂模式中已经很接近完成这个目标了，无论怎么修改类的代码我们都只需要修改工厂类的代码即可完成适配。</p>
+<p>类对类存在依赖，实际上就是在这个类里面我们会需要一个一个类的实例来干一些事情，那么除了在自己的内部产生还有没有别的办法来获得一个对象呢？有的，正如#2的标题所说，注入！</p>
+<p>什么叫注入呢？只要不是在类的内部new或者工厂make的实例，而是通过参数或者其他形式获取的实例其实都叫注入。</p>
+<p>比如:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">House</span></span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $memebrs</span><br><span class="line">    </span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($members)</span></span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;members = $members;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/" class="archive-article-date">
-  <time datetime="2020-01-23T03:34:14.000Z" itemprop="datePublished">1月 23</time>
-</a>
+
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/01/23/ES6%E5%8F%98%E9%87%8F%E7%9A%84%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC/">ES6变量的解构赋值</a>
-    </h1>
-  
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/06/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%BA%8C/" data-id="ck6i0dx2z0004ojux2p3l9v4v" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/" rel="tag">laravel</a></li></ul>
 
-    </header>
+    </footer>
   </div>
-</article>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/02/07/%E5%92%95%E5%92%95%E5%92%95/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          咕咕咕
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2020/02/05/laravel%E6%9C%8D%E5%8A%A1%E5%AE%B9%E5%99%A8-%E4%B8%80/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">laravel服务容器(一)</div>
+    </a>
   
+</nav>
 
+  
+</article>
 
 </section>
         
