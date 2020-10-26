@@ -15,32 +15,32 @@
 <p>访问<code>192.168.1.1</code>在breed里面点更新固件，勾选固件，上传下载好的固件，一路rush刷固件</p>
 <p>等待一段时间路由器重启。</p>
 <h2 id="路由器配置"><a href="#路由器配置" class="headerlink" title="路由器配置"></a>路由器配置</h2><h4 id="访问webUI"><a href="#访问webUI" class="headerlink" title="访问webUI"></a><strong>访问webUI</strong></h4><p>等到分配给本地的ip地址不是<code>169.254.x.x</code>然后<code>192.168.1.1</code>访问<code>luci-webUI</code>。</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C1.png" alt="image-20201026153814398"></p>
+<p><img src="images%5Cconfig-router%5C1.png" alt="image-20201026153814398"></p>
 <h4 id="wifi配置"><a href="#wifi配置" class="headerlink" title="wifi配置"></a><strong>wifi配置</strong></h4><p>很好，很有精神。然后常规配置，把wifi安排上。</p>
 <p>基本设置</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C3.png" alt="image-20201026155126296"></p>
-<p>接口配置，基本没什么需要改的，改一下SSID<img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C4.png" alt="image-20201026155158508"></p>
-<p>密码在无线安全里面设置<img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C5.png" alt="image-20201026155246561"></p>
+<p><img src="images%5Cconfig-router%5C3.png" alt="image-20201026155126296"></p>
+<p>接口配置，基本没什么需要改的，改一下SSID<img src="images%5Cconfig-router%5C4.png" alt="image-20201026155158508"></p>
+<p>密码在无线安全里面设置<img src="images%5Cconfig-router%5C5.png" alt="image-20201026155246561"></p>
 <p>大概完事了，保存&amp;应用</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C2.png" alt="image-20201026154834652"></p>
+<p><img src="images%5Cconfig-router%5C2.png" alt="image-20201026154834652"></p>
 <p>然后测试了一下，小爱同学精神了，手机也能连上了。测一下速，很好很有精神 15M/s。</p>
 <h3 id="服务"><a href="#服务" class="headerlink" title="服务"></a><strong>服务</strong></h3><h4 id="广告屏蔽大师"><a href="#广告屏蔽大师" class="headerlink" title="广告屏蔽大师"></a><strong>广告屏蔽大师</strong></h4><p>虽然不知道有没有用并且浏览器也有ads Killers的插件</p>
 <p>但是既然提供了这个功能，就直接安排上吧</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C6.png" alt="image-20201026160701363"></p>
-<h4 id="解锁网易云灰色歌曲"><a href="#解锁网易云灰色歌曲" class="headerlink" title="解锁网易云灰色歌曲"></a><strong>解锁网易云灰色歌曲</strong></h4><p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C7.png" alt="image-20201026160853058"></p>
+<p><img src="images%5Cconfig-router%5C6.png" alt="image-20201026160701363"></p>
+<h4 id="解锁网易云灰色歌曲"><a href="#解锁网易云灰色歌曲" class="headerlink" title="解锁网易云灰色歌曲"></a><strong>解锁网易云灰色歌曲</strong></h4><p><img src="images%5Cconfig-router%5C7.png" alt="image-20201026160853058"></p>
 <h4 id="PassWall"><a href="#PassWall" class="headerlink" title="PassWall"></a><strong>PassWall</strong></h4><p>先配置好节点订阅，之后手动订阅一次</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C8.png" alt="image-20201026161037963"></p>
+<p><img src="images%5Cconfig-router%5C8.png" alt="image-20201026161037963"></p>
 <p>然后打开总开关，启动TCP节点。</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C9.png" alt="image-20201026161246415"></p>
+<p><img src="images%5Cconfig-router%5C9.png" alt="image-20201026161246415"></p>
 <p>如果在校园网环境下，可能会发生无法解析校园网登陆页面的域名的情况，可以设置一个自定义挟持的域名</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C10.png" alt="image-20201026162752106"></p>
+<p><img src="images%5Cconfig-router%5C10.png" alt="image-20201026162752106"></p>
 <h4 id="校园网自动登录脚本"><a href="#校园网自动登录脚本" class="headerlink" title="校园网自动登录脚本"></a><strong>校园网自动登录脚本</strong></h4><p>用上了路由器还需要每天都登录校园网实在太奇怪了（x</p>
 <p>之前能使用的校园网自动登陆脚本用不了了，于是花了半小时重新写了一个。<a href="https://github.com/X3ZvaWQ/njupt-net-login-bash" target="_blank" rel="noopener">脚本仓库地址</a></p>
 <p>通过scp工具把脚本移入路由器的内存中</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp ./Desktop/njupt.sh root@192.168.1.1:/root/scripts</span><br></pre></td></tr></table></figure>
 
 <p>然后写进计划任务</p>
-<p><img src="D:%5Cworkspace%5Cx3zblog%5Csource%5Cimages%5Cconfig-router%5C11.png" alt="image-20201026184637145"></p>
+<p><img src="images%5Cconfig-router%5C11.png" alt="image-20201026184637145"></p>
 <p>每天早上07:05执行脚本，23：00~07：00校园网没法登陆。</p>
 <h4 id="ipv6配置"><a href="#ipv6配置" class="headerlink" title="ipv6配置"></a><strong>ipv6配置</strong></h4><p>最后怎么能不安排校园网的灵魂——ipv6呢？</p>
 <p><del>虽然说是这么说，折腾了很久也没有折腾好之后我选择暂时放弃，留下一个坑在这里。</del></p>
