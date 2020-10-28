@@ -61,7 +61,20 @@
 <p>早在大一刚接触vue的组件化、数据绑定的思想的时候就觉得这是一种十分优雅的解决方案。</p>
 <p>这个bug这么修大概算是一种比较优雅的方式（？</p>
 <p>估计没有后续了吧（x</p>
-<p>今天到此为止</p>
+<p>说没后续了后续就来了，刚才突然灵光一闪，之前假设的可能是因为一个图片上面绑定了两个事件导致的冲突才出现的bug。</p>
+<p>可是问题是，第一次触发init的时候图片都还没出生呢，怎么可能绑定两个bug！</p>
+<p>但是像上面那么改也确实没有出现问题。</p>
+<p>多看了一眼，难道是因为click事件绑定在了Article组件的上面？</p>
+<p>于是查阅了一下jquery的官方文档对于on的第三个参数selector的介绍：</p>
+<blockquote>
+<p>A selector string to filter the descendants of the selected elements that trigger the event. If the selector is null or omitted, the event is always triggered when it reaches the selected element.</p>
+</blockquote>
+<p>emmm 好吧，大概破案了。第三个参数用作在触发了事件后，判断触发事件的对象是否符合条件。比如这里selector是img:visible，那么在触发事件的时候才会去判断用户是不是点击了一个img:visible触发的事件。</p>
+<p>所以像上面那么处理可能不是最好的？</p>
+<p>感觉应该直接把事件绑定在图片上比较靠谱。emmm 这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$($root).find($selector).on(<span class="string">"click"</span>, (e) =&gt; &#123;</span><br><span class="line">    <span class="keyword">this</span>.open(e.target);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>于是也不需要off了，嗯….</p>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-10-28</span><i class="fa fa-tag"></i><a class="tag" href="/tags/修bug-vue/" title="修bug,vue">修bug,vue </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://yoursite.com/2020/10/28/记修jx3box-com关于PhotoSwipe的一个bug-二/,X3ZvaWQ,记修jx3box.com关于PhotoSwipe的一个bug(二),;" target="_blank" rel="noopener"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2020/10/27/%E8%AE%B0%E4%BF%AEjx3box-com%E5%85%B3%E4%BA%8EPhotoSwipe%E7%9A%84%E4%B8%80%E4%B8%AAbug-%E4%B8%80/" title="记修jx3box.com关于PhotoSwipe的一个bug(一)">Próximo post</a></li></ul></div><a id="comments"></a><div id="vcomments" style="margin:0 30px;"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/gh/xcss/valine@v1.1.7/dist/Valine.min.js?v=undefined"></script><script>var valine = new Valine({
   el:'#vcomments',
   notify:false || false, 
