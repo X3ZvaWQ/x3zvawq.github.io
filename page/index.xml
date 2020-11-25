@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pages on X3ZvaWQ</title>
+    <link>https://blog.x3zvawq.xyz/page/</link>
+    <description>Recent content in Pages on X3ZvaWQ</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhcn</language>
+    <lastBuildDate>Tue, 21 Jan 2020 23:24:04 +0800</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/page/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About</title>
+      <link>https://blog.x3zvawq.xyz/about/</link>
+      <pubDate>Tue, 21 Jan 2020 23:24:04 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/about/</guid>
+      <description>student of NJUPT. 热爱学(摸)习(鱼)。🐟
+ 联系方式
+QQ Number：3303928580
+Github: HomePage
+Telegram: @X3ZvaWQ
+ blog的
+ 2020-11-25 blog从hexo改为hugo，为什么？因为想玩点新花样（x 2020-01-21 blog从wordpress改为hexo，为啥？因为wordpress是动态的，我并不需求动态的blog。访问起来有些莫名的慢。并且有域名需求不能放在国内没备案的主机上只能跑在国外服务器，之前用的美国的搬瓦工慢到了一种境界。静态界面更容易部署到比如github page的托管服务上。 blog本来是使用wordpress搭建的。   下面是絮絮叨叨的原文：
+服务器从墙里出来之后就纠结了好久要不要重新搭这个博客,然而拖延症还是犯了… 于是直到暑假结束快要开学了才正式开始搭(
+其实中间也不是没有尝试过，之前也用过ubuntu配好了环境，然后在想自己写一个博客的时候正好是6月4号前后由于某些原因大量国外ip被墙，当时我服务器正好搭了一个ss的服务端….于是果断中枪了，考虑到并没有什么损失我就直接格了服务器关机一直放在那里没有动了
+然后从墙里出来之后一想，我好像还没有用过 centOS，于是就整了一个centOS7。然后配lnmp配自闭了( 各种缺东西，包里面老是找不到想要的东西，以及踩了各种雷，踩完雷排雷头都疼了。然后就累了再也没有动过直到前几天
+嗯…然后整了一个 lnmp一键安装包。没什么好说的 就是一个爽字，再也不用纠结php和nginx连不上什么的奇怪的坑了。之前弄了大半天的 Let’s Encrypt 证书也只需要lnmp ssl add就好惹。
+然后配好了一切之后需要纠结的就只有blog了(当然我并不打算只用来放blog)，纠结了很久是自己写还是用现成的框架，最后还是选择了WordPress，如果有一个用Laravel写的博客框架的话我大概会想用那个吧，WordPress的插件和主题虽然也很多，但是似乎自己改起代码来并不是那么的愉快呢。
+有了，之后有空可以自己写一个Laravel为框架的博客嘛。然后还可以加自制主题，自制插件什么的。嗯嗯嗯似乎可行！
+然后就先这样吧( 之后可以愉快的写文了，wordpress的编辑器还是很棒的嗯。
+Hello World！</description>
+    </item>
+    
+    <item>
+      <title>Archives</title>
+      <link>https://blog.x3zvawq.xyz/archives/</link>
+      <pubDate>Tue, 28 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/archives/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Search</title>
+      <link>https://blog.x3zvawq.xyz/search/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/search/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

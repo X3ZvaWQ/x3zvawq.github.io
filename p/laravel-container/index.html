@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zhcn">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='从根本弄不懂到逐渐理解...'><title>laravel服务容器</title>
+
+<link rel='canonical' href='https://blog.x3zvawq.xyz/p/laravel-container/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='laravel服务容器'>
+<meta property='og:description' content='从根本弄不懂到逐渐理解...'>
+<meta property='og:url' content='https://blog.x3zvawq.xyz/p/laravel-container/'>
+<meta property='og:site_name' content='X3ZvaWQ'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='laravel' /><meta property='article:published_time' content='2020-02-05T18:29:44&#43;08:00'/><meta property='article:modified_time' content='2020-02-05T18:29:44&#43;08:00'/>
+<meta name="twitter:title" content="laravel服务容器">
+<meta name="twitter:description" content="从根本弄不懂到逐渐理解...">
+    </head>
+    <body class="">
+        <div class="container flex on-phone--column align-items--flex-start extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+
+                
+                    
+                    <img src="/img/avatar_hu8fe5683852e99d12f6b76a6fc629c76f_7029_300x300_resize_q75_box.jpg" width="300"
+                        height="300" class="site-logo" loading="lazy" alt="Avatar">
+                
+
+                
+                    <span class="emoji">🐟</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://blog.x3zvawq.xyz/">X3ZvaWQ</a></h1>
+        <h2 class="site-description">Nothing can be done without faith.</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://blog.x3zvawq.xyz/" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+                <a href="/categories/laravel/">laravel</a>
+            
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/laravel-container/">laravel服务容器</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        从根本弄不懂到逐渐理解...
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Feb 05, 2020</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>laravel用了也挺久的了，曾经也想过深入研究读读源码什么的，但是尝试过几次都从心了。</p>
+<p>正好寒假无聊得慌，然后就准备深入一点琢磨一下。</p>
+<p>从服务容器开始(x 当初看laravel中文文档的时候，开头就是核心架构里面的服务容器什么的，把自己给怼自闭了</p>
+<p>所以后来也没成功弄懂，后来倒是写过一次<code>IoC</code>的实例。但是到现在也忘光了(x</p>
+<blockquote>
+<p>依赖注入和控制反转是对同一件事情的不同描述，它们描述的角度不同。</p>
+<ul>
+<li>依赖注入是从应用程序的角度在描述，应用程序依赖容器创建并注入它所需要的外部资源。</li>
+<li>控制反转是从容器的角度在描述，容器控制应用程序，由容器反向的向应用程序注入应用程序所需要的外部资源。</li>
+</ul>
+</blockquote>
+<p>这个可能并不一定看的太懂，但是之所以要使用这一种模式关键还是为了解耦。</p>
+<hr>
+<h2 id="0-常规操作">#0 常规操作</h2>
+<p>面向对象的程序开发离不开类、接口、对象这些东西。然后万物皆对象，房子可以是一个对象，人也是可以是一个对象，那么人在房子里。这两个对象就扯上关系了，他们之间就存在着一个依赖。</p>
+<p>就用上面的例子，房子，人这个时候可能会这么写：</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">class</span> <span class="nc">Human</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$name</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$age</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span><span class="nv">$age</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$name</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">age</span> <span class="o">=</span> <span class="nv">$age</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">House</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$human</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">human</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Human</span><span class="p">(</span><span class="s1">&#39;咕咕咕&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p>对于小型项目寥寥几个类这样的依赖并不会发生什么不愉悦的事情，就算业务发生变化有什么需要修改的事情也只需要修改寥寥几个地方。比如在上面的地方只有在House类的内部有一个<code>new People</code>。</p>
+<p>但是如果一个项目大了起来，类开始多了起来，然后依赖变得复杂起来。从一对一变成一对多甚至多对多的时候就是噩梦一般的体验了。比如：</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">class</span> <span class="nc">Human</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$name</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$age</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span><span class="nv">$age</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$name</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">age</span> <span class="o">=</span> <span class="nv">$age</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">Dog</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$name</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$age</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span><span class="nv">$age</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$name</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">age</span> <span class="o">=</span> <span class="nv">$age</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">Cat</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$name</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$age</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span><span class="nv">$age</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$name</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">age</span> <span class="o">=</span> <span class="nv">$age</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">House</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$human</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$dog</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$cat</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">human</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Human</span><span class="p">(</span><span class="s1">&#39;咕咕咕&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">dog</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Dog</span><span class="p">(</span><span class="s1">&#39;汪汪汪&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cat</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cat</span><span class="p">(</span><span class="s1">&#39;喵喵喵&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><h2 id="1-工厂模式-factory-pattern">#1 工厂模式 Factory Pattern</h2>
+<p>在上面的代码中，如果Cat类的构造函数，或者类名什么的发生了变化，那么就需要修改House的代码，可能发感觉不到什么，那么如果有其他的东西也对猫有依赖呢？比如有一个<code>CatHouse</code>类，有一个<code>CatClimb</code>类，或者更多？那么是不是意味着修改一个Cat一个构造函数就需要修改多个类？这将会是多么糟糕的体验？</p>
+<p>所以为了避免这种事情，后来就有人提出了工厂模式，什么叫工厂模式呢？Show code。</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">class</span> <span class="nc">BiologyFactory</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">make</span><span class="p">(</span><span class="nv">$type</span><span class="p">,</span> <span class="nv">$options</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">switch</span> <span class="p">(</span><span class="nv">$type</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="s1">&#39;human&#39;</span> <span class="o">:</span> <span class="k">return</span> <span class="k">new</span> <span class="nx">Human</span><span class="p">(</span><span class="nv">$options</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nv">$options</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+            <span class="k">case</span> <span class="s1">&#39;dog&#39;</span> <span class="o">:</span> <span class="k">return</span> <span class="k">new</span> <span class="nx">Dog</span><span class="p">(</span><span class="nv">$options</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nv">$options</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+            <span class="k">case</span> <span class="s1">&#39;cat&#39;</span> <span class="o">:</span> <span class="k">return</span> <span class="k">new</span> <span class="nx">Cat</span><span class="p">(</span><span class="nv">$options</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nv">$options</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p>然后呢，房子类就可以这么写了：</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">class</span> <span class="nc">House</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nx">members</span><span class="p">;</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$members</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BiologyFactory</span><span class="p">;</span>
+        <span class="k">foreach</span><span class="p">(</span><span class="nv">$members</span> <span class="k">as</span> <span class="nv">$member</span> <span class="o">=&gt;</span> <span class="nv">$options</span><span class="p">){</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">members</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$factory</span><span class="o">-&gt;</span><span class="na">make</span><span class="p">(</span><span class="nv">$member</span><span class="p">,</span> <span class="nv">$options</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p>试想，当我们这么操作之后，如果我们修改了Cat类，Dog类还需要修改House类的代码嘛，很明显是不需要的。又如同我们之前说的如果又多个类同时依赖Cat类，我们修改了Cat类的构造方法也再无必要去修改多个依赖了他的类，我们需要做的只有修改工厂类即可。</p>
+<p>在这个过程中，我们相当于在一对多或者对多对的依赖中添加了一层工厂，原本类直接对类产生依赖，现在我们在类与类之间添加了一个工厂，让类依赖工厂，通过工厂来获取原来依赖的对象。这么一来是不是舒服很多了呢？</p>
+<p>然而人们追求优雅的脚步是永无止尽的，既然可以做到像上面的类只需要依赖一个类，那么有没有可能做到完全的解耦呢？不管怎么修改我们都不需要去修改类的代码。</p>
+<p>比如我们现在如果修改了Cat类，我们只需要修改工厂类的代码即可，那么有没有可能不需要修改工厂类的代码呢？再或者说，如果添加了更多的生物类我们就需要去修改工厂类的代码为switch添加更多的case。有没有可能不修改类的代码而是通过其他的方法来实现呢？</p>
+<p>以及，这样的工厂真的就是最优雅的了吗？如果同一个生物有不同的构造方法，那么该怎么处理呢？是不是同一个类需要多个case来进行处理呢？这是不是意味着工厂生产东西的对象类型有些单一了呢？</p>
+<p>所以，上述的问题都会被解决。</p>
+<h2 id="2-依赖注入-dependency-injection">#2 依赖注入 Dependency Injection</h2>
+<p>类对类存在依赖，我们希望的是解耦，即修改一个类的代码不需要去改动其他类的代码，在前面的工厂模式中已经很接近完成这个目标了，无论怎么修改类的代码我们都只需要修改工厂类的代码即可完成适配。</p>
+<p>类对类存在依赖，实际上就是在这个类里面我们会需要一个一个类的实例来干一些事情，那么除了在自己的内部产生还有没有别的办法来获得一个对象呢？有的，正如#2的标题所说，注入！</p>
+<p>什么叫注入呢？只要不是在类的内部new或者工厂make的实例，而是通过参数或者其他形式获取的实例其实都叫注入。</p>
+<p>比如:</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">class</span> <span class="nc">House</span><span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$memebrs</span>
+    
+	<span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$members</span><span class="p">){</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">members</span> <span class="o">=</span> <span class="nv">$members</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p>这样是通过构造函数创建实例的时候就注入了一个已经创建好的对象，当然不可能需要我们手动去实例化对象，那和一开始#0的常规操作有什么区别呢？</p>
+<p>前面也说过，<strong>依赖注入是从应用程序的角度在描述，应用程序依赖容器创建并注入它所需要的外部资源。</strong></p>
+<p>在初始化类的时候，依赖容器来实例化这一个<code>House</code>类，那么该如何让容器知道怎么实例化这个类呢？或者说再明确一点，怎么样让容器知道用什么参数来<code>new</code>一个<code>House</code>。我们可以规定只能传入一个固定的类的实例来构造我们的<code>House</code>，只需要这么修改构造函数：</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nx">Human</span> <span class="nv">$members</span><span class="p">){</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">members</span> <span class="o">=</span> <span class="nv">$members</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div><p>但我们肯定不希望这个房子里只有人，</p>
+<p>则会用到一个面向对象的语言都该有的概念——接口。接口是一种约束形式，其中只包括成员定义，不包含成员实现的内容。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/laravel/">laravel</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>CC BY-NC-ND</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title"></h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="">
+    <a href="/p/laravel-note-2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Laravel的Eloquent(教学笔记)</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="">
+    <a href="/p/laravel-note-1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Laravel的简要理解(教学笔记)</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">&copy; 2020 X3ZvaWQ</section>
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="1.1.0">Stack</a></b> designed by
+        <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true" style="display:none">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<link rel="stylesheet" href="/css/highlight/light.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="/css/highlight/dark.min.css" media="(prefers-color-scheme: dark)">
+
+    </body>
+</html>

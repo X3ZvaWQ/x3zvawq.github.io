@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zhcn">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='主要的锅在于网上的旧文档....'><title>Linux上的饥荒服务器搭建</title>
+
+<link rel='canonical' href='https://blog.x3zvawq.xyz/p/dontstarve-linux-server/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='Linux上的饥荒服务器搭建'>
+<meta property='og:description' content='主要的锅在于网上的旧文档....'>
+<meta property='og:url' content='https://blog.x3zvawq.xyz/p/dontstarve-linux-server/'>
+<meta property='og:site_name' content='X3ZvaWQ'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='dontstarve' /><meta property='article:published_time' content='2020-01-22T00:35:04&#43;08:00'/><meta property='article:modified_time' content='2020-01-22T00:35:04&#43;08:00'/>
+<meta name="twitter:title" content="Linux上的饥荒服务器搭建">
+<meta name="twitter:description" content="主要的锅在于网上的旧文档....">
+    </head>
+    <body class="">
+        <div class="container flex on-phone--column align-items--flex-start extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+
+                
+                    
+                    <img src="/img/avatar_hu8fe5683852e99d12f6b76a6fc629c76f_7029_300x300_resize_q75_box.jpg" width="300"
+                        height="300" class="site-logo" loading="lazy" alt="Avatar">
+                
+
+                
+                    <span class="emoji">🐟</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://blog.x3zvawq.xyz/">X3ZvaWQ</a></h1>
+        <h2 class="site-description">Nothing can be done without faith.</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://blog.x3zvawq.xyz/" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+                <a href="/categories/dontstarve/">dontstarve</a>
+            
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/dontstarve-linux-server/">Linux上的饥荒服务器搭建</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        主要的锅在于网上的旧文档....
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Jan 22, 2020</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>无聊的暑假，想和小伙伴联机玩一下饥荒，本来也想不到要自己搭一个服务器的，奈何后来直接游戏里面启动服务器发现客机总是会卡的令人难以接受，然后我才意识我我和我的小伙伴一个是电信网一个是移动网。以及我们玩人类一败涂地也有着比较高的延迟，于是没有办法了，想好好打饥荒就必须得搭一个服务器了。正好有一个闲置的阿里云服务器，因为嫌备案麻烦一直丢在那里，正好物尽其用。</p>
+<p><figure>
+		<a href="/p/dontstarve-linux-server/1.jpg" data-size="1000x708">
+			<img srcset="/p/dontstarve-linux-server/1_hu54b45838f18e2c07a060d85f49affbbb_410225_480x0_resize_q75_box.jpg 480w, /p/dontstarve-linux-server/1_hu54b45838f18e2c07a060d85f49affbbb_410225_1024x0_resize_q75_box.jpg 1024w"
+				src="/p/dontstarve-linux-server/1.jpg" width="1000" height="708" loading="lazy"
+				alt="img">
+		</a>
+		
+		<figcaption>img</figcaption>
+		
+	</figure></p>
+<p>确实踩了不少的坑，因为饥荒的配置文件经过一次不小的更新，整个都变了，所以网上很多的教程其实都已经过期了，本文主要讲述一下我是怎么干的吧.</p>
+<ul>
+<li><a class="link" href="https://developer.valvesoftware.com/wiki/SteamCMD"  target="_blank" rel="noopener"
+    >steamcmd怎么使用的官方教程(英文)</a></li>
+<li><a class="link" href="https://dontstarve.fandom.com/wiki/Guides/Don%e2%80%99t_Starve_Together_Dedicated_Servers"  target="_blank" rel="noopener"
+    >自建服务器的饥荒官方教程(英文)</a></li>
+<li><a class="link" href="https://developer.valvesoftware.com/wiki/Dedicated_Servers_List"  target="_blank" rel="noopener"
+    >steamcmd支持的专业服务器列表(英文)</a></li>
+<li><a class="link" href="http://blog.ttionya.com/article-1235.html"  target="_blank" rel="noopener"
+    >饥荒联机独立服务器搭建教程（三）：配置篇</a></li>
+</ul>
+<p>先给steamcmd专门创建一个用户，虽然我不知道有没有这个必要，但是感觉全都用一个root账号并不好，独立开来也挺好的。</p>
+<pre><code>$ useradd -m steam
+$ cd /home/steam
+$ passwd steam
+</code></pre><p>之后给新用户输入一个密码，之后切换到新建的用户安装steamcmd，通过apt安装理论上会自动安装依赖吧，如果没有自动安装的话请参照<a class="link" href="https://developer.valvesoftware.com/wiki/SteamCMD"  target="_blank" rel="noopener"
+    >steamcmd怎么使用的官方教程(英文)</a>里的<code>Downloading SteamCMD - Linux - Manually</code>进行安装。</p>
+<pre><code>$ su steam
+$ sudo apt install steamcmd
+$ ln -s /usr/games/steamcmd steamcmd
+</code></pre><p>上述最后一行我也不知道有没有必要惹，link一个快捷方式而已。之后直接启动steamcmd就可以了。</p>
+<pre><code>$ steamcmd
+Redirecting stderr to '/home/steam/.steam/logs/stderr.txt'
+[  0%] Checking for available updates...
+[----] Verifying installation...
+Steam Console Client (c) Valve Corporation
+-- type 'quit' to exit --
+Loading Steam API...OK.
+
+Steam&gt;
+</code></pre><p>到了这里steam就已经成功启动了，然后我们要做的就是安装一下DST的专用服务器。首先登陆账号，跟着下面输入。</p>
+<pre><code>Steam&gt;login username
+... #第一次登录会要求输入密码，以及可能的话还会有验证码照着输入即可
+Logging in user 'loop_void' to Steam Public ...
+Logged in OK
+Waiting for user info...OK
+
+Steam&gt;force_install_dir /home/steam/steamapps/DST
+
+Steam&gt;app_update 343050 validate
+... #然后就是漫长的下载了,这里的343050是饥荒专业服务器的id
+
+Steam&gt;quit
+$
+</code></pre><p>到这里服务器应该就已经安装好了，到steam的用户目录下应该已经可以看到这几个文件夹了，这个时候这个目录下应该还是没有.klei文件夹的，我当时按照别的教程纠结了半天我的.klei呢</p>
+<pre><code>$ ll
+...
+drwxrwxr-x 9 steam steam  4096 Aug 24 16:27 .steam/
+drwxrwxr-x 3 steam steam  4096 Jul 29 14:33 steamapps/
+lrwxrwxrwx 1 steam steam    19 Jul 12 20:47 steamcmd -&gt; /usr/games/steamcmd*
+...
+</code></pre><p>之后继续…</p>
+<pre><code>$ cd /steamapps/DST/bin
+$ ./dontstarve_dedicated_server_nullrenderer
+</code></pre><p>会开始刷屏，等到不动了直接 Ctrl+C 整个关掉，这个时候返回<code>/home/steam</code>可以看到已经多了一个<code>.klei</code>的目录了</p>
+<pre><code>$ cd ~
+$ tree .klei/
+.klei/
+├── Agreements
+│   └── DoNotStarveTogether
+│       └── agreements.ini
+└── DoNotStarveTogether
+    └── Cluster_1
+        └── ...
+</code></pre><p>到这里就已经成功了大半了，之后只需要把位置文件，用户token什么的都弄好放进同一个文件夹再放到<code>./klei/DoNotStarveTogether</code> 这个文件夹下面。这一部分可以参考 <a class="link" href="http://blog.ttionya.com/article-1235.html"  target="_blank" rel="noopener"
+    >饥荒联机独立服务器搭建教程（三）：配置篇</a> 。</p>
+<p>其实这些配置并不需要自己一个一个的手动去配置，只需要本地游戏中创建世界，设定好你想要的mod和各种世界选项之后进入游戏，等世界创建完进入到选人界面之后直接退出，然后去<code>~\Documents\Klei\DoNotStarveTogether\steam_id</code>这个目录里面找到对应的Cluster_x；</p>
+<ul>
+<li>~对应的是系统用户的目录</li>
+<li>steam_id是创建世界用的steam账号的id，如果只用一个账号登陆过的话应该只会有一个数字作为名字的目录</li>
+<li>x就是创建世界的时候对应的第几个格子</li>
+</ul>
+<p>把那个文件夹复制出来，按照 <a class="link" href="http://blog.ttionya.com/article-1235.html"  target="_blank" rel="noopener"
+    >饥荒联机独立服务器搭建教程（三）：配置篇</a> 内的方法把你的klei用户token放到<code>cluster_token.txt</code>里面即可。</p>
+<p>然后把整个文件夹都复制到服务器的<code> ./klei/DoNotStarveTogether</code>内，服务器就配置就大致完成了。如果把原来生成的世界删掉打算在服务器上再次生成的话可以删除<code>Master</code>和<code>Caves</code>内的<code>saves</code>文件夹和一些别的东西，这个时候存档文件夹应该像这样。</p>
+<pre><code>$ tree Cluster_1
+Cluster_1
+├── Caves
+│   ├── leveldataoverride.lua
+│   ├── modoverrides.lua
+│   └── server.ini
+├── cluster.ini
+├── cluster_token.txt
+└── Master
+    ├── leveldataoverride.lua
+    ├── modoverrides.lua
+    └── server.ini
+</code></pre><p>如果打算把原来的存档也挪移到服务器上则不需要删除任何文件夹。 然后还需要把你的mod的id告诉服务器让服务器去下载这些mod，可以参照 <a class="link" href="http://blog.ttionya.com/article-1235.html"  target="_blank" rel="noopener"
+    >饥荒联机独立服务器搭建教程（三）：配置篇</a> 中的 6、配置下载的 Mod 文件 ， <code>dedicated_server_mods_setup.lua</code> 在<code>/home/steam/steamapps/DST/mods</code>目录内。</p>
+<p>到这里配置都弄好了，只需要启动服务器就可以了。注意一定要切换到<code>dontstarve_dedicated_server_nullrenderer</code>所在的目录内去运行这个东西，不然会发生很快乐的事情。</p>
+<pre><code>$ ./dontstarve_dedicated_server_nullrenderer
+</code></pre><p>即可，默认会运行Cluster_1这个存档中的Master世界，如果想要运行两个世界的话可以运行两次这个程序在后面分别添加参数<code>-shard Master</code>和<code>-shard Caves</code>,当然，同样可以添加参数<code>-cluster Cluster_x</code>来指定加载哪一个存档。</p>
+<p>你可能发现了当你运行了这个程序之后就不能再干别的事情了，Ctrl+C会直接中止服务器，这个时候可以考虑一下使用screen这个程序，如果服务器上没有screen则可以这么安装。</p>
+<pre><code>$ sudo apt install screen
+</code></pre><p>然后该执行的代码就变成了</p>
+<pre><code>$ screen -S &quot;DST Server Master&quot; ./dontstarve_dedicated_server_nullrenderer -shard Master -cluster Cluster_1
+$ screen -S &quot;DST Server Caves&quot; ./dontstarve_dedicated_server_nullrenderer -shard Caves -cluster Cluster_1
+</code></pre><p>进入一个screen之后按Ctrl+A然后松开再按D即可返回，上面的两条命令中间就需要进行一次这个操作。执行完第二条命令之后也可以这么干把终端腾出来。</p>
+<p><code>screen -ls</code> 可以查看所有的在运行的screen,<code>screen -r id</code>可以回到某一个screen，如果只有一个运行中的screen则不需要输入id，id可以输入<code>screen -ls</code>看到正在运行的所有screen的id</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/dontstarve/">dontstarve</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>CC BY-NC-ND</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title"></h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="">
+    <a href="/p/dontstarve-modding-2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">饥荒联机版mod开发摸鱼(一)</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="">
+    <a href="/p/dontstarve-modding-1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">饥荒联机版mod开发摸鱼(一)</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">&copy; 2020 X3ZvaWQ</section>
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="1.1.0">Stack</a></b> designed by
+        <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true" style="display:none">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<link rel="stylesheet" href="/css/highlight/light.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="/css/highlight/dark.min.css" media="(prefers-color-scheme: dark)">
+
+    </body>
+</html>

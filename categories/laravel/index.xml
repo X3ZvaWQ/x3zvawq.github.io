@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>laravel on X3ZvaWQ</title>
+    <link>https://blog.x3zvawq.xyz/categories/laravel/</link>
+    <description>Recent content in laravel on X3ZvaWQ</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhcn</language>
+    <lastBuildDate>Wed, 05 Feb 2020 18:29:44 +0800</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/categories/laravel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>laravel服务容器</title>
+      <link>https://blog.x3zvawq.xyz/p/laravel-container/</link>
+      <pubDate>Wed, 05 Feb 2020 18:29:44 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/laravel-container/</guid>
+      <description>laravel用了也挺久的了，曾经也想过深入研究读读源码什么的，但是尝试过几次都从心了。
+正好寒假无聊得慌，然后就准备深入一点琢磨一下。
+从服务容器开始(x 当初看laravel中文文档的时候，开头就是核心架构里面的服务容器什么的，把自己给怼自闭了
+所以后来也没成功弄懂，后来倒是写过一次IoC的实例。但是到现在也忘光了(x
+ 依赖注入和控制反转是对同一件事情的不同描述，它们描述的角度不同。
+ 依赖注入是从应用程序的角度在描述，应用程序依赖容器创建并注入它所需要的外部资源。 控制反转是从容器的角度在描述，容器控制应用程序，由容器反向的向应用程序注入应用程序所需要的外部资源。   这个可能并不一定看的太懂，但是之所以要使用这一种模式关键还是为了解耦。
+ #0 常规操作 面向对象的程序开发离不开类、接口、对象这些东西。然后万物皆对象，房子可以是一个对象，人也是可以是一个对象，那么人在房子里。这两个对象就扯上关系了，他们之间就存在着一个依赖。
+就用上面的例子，房子，人这个时候可能会这么写：
+class Human { protected $name; protected $age; public function __construct($name,$age) { $this-&amp;gt;name = $name; $this-&amp;gt;age = $age; } } class House { protected $human; public function __construct() { $this-&amp;gt;human = new Human(&amp;#39;咕咕咕&amp;#39;, 18); } } 对于小型项目寥寥几个类这样的依赖并不会发生什么不愉悦的事情，就算业务发生变化有什么需要修改的事情也只需要修改寥寥几个地方。比如在上面的地方只有在House类的内部有一个new People。
+但是如果一个项目大了起来，类开始多了起来，然后依赖变得复杂起来。从一对一变成一对多甚至多对多的时候就是噩梦一般的体验了。比如：
+class Human { protected $name; protected $age; public function __construct($name,$age) { $this-&amp;gt;name = $name; $this-&amp;gt;age = $age; } } class Dog { protected $name; protected $age; public function __construct($name,$age) { $this-&amp;gt;name = $name; $this-&amp;gt;age = $age; } } class Cat { protected $name; protected $age; public function __construct($name,$age) { $this-&amp;gt;name = $name; $this-&amp;gt;age = $age; } } class House { protected $human; protected $dog; protected $cat; public function __construct() { $this-&amp;gt;human = new Human(&amp;#39;咕咕咕&amp;#39;, 18); $this-&amp;gt;dog = new Dog(&amp;#39;汪汪汪&amp;#39;, 2); $this-&amp;gt;cat = new Cat(&amp;#39;喵喵喵&amp;#39;, 2); } } #1 工厂模式 Factory Pattern 在上面的代码中，如果Cat类的构造函数，或者类名什么的发生了变化，那么就需要修改House的代码，可能发感觉不到什么，那么如果有其他的东西也对猫有依赖呢？比如有一个CatHouse类，有一个CatClimb类，或者更多？那么是不是意味着修改一个Cat一个构造函数就需要修改多个类？这将会是多么糟糕的体验？</description>
+    </item>
+    
+    <item>
+      <title>Laravel的Eloquent(教学笔记)</title>
+      <link>https://blog.x3zvawq.xyz/p/laravel-note-2/</link>
+      <pubDate>Fri, 31 Jan 2020 18:38:53 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/laravel-note-2/</guid>
+      <description>在对laravel的理解一文中，结尾提到了一下Model
+然后考虑到篇幅限制，以及暂时用不到，所以就没有做更详细的阐述
+说到Model，就必然离不开数据库，因为Model就是一个后端应用的数据层。他的位置应该是在控制器与数据库之间，负责的部分是直接与数据库进行交互，返回数据给控制器。
+在知道model是干什么的情况下，我们需要做什么呢？
+我们现在的数据库还没创建好，所以首先创建好数据库
+注意，如果使用mysql的话，关于数据库的部分配置在.env文件内:
+DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_PORT=3306 DB_DATABASE=laravel DB_USERNAME=root DB_PASSWORD=root 内，配置好用户名和密码之后，我们需要做的就是创建一个和上面DB_DATABASE配置项同名的数据库。
+如果使用navicat或者phpAdmin可能会比较轻松，如果使用mysql命令的话大概是登陆进数据库之后create database laravel
+然后剩下的部分，都通过php代码完成。
+假设存在这样的一个表：
+  image-20200130190618309 
+这个表有6个字段，分别是
+ id作为每一条数据的唯一识别编号 user_id用来标识与这个post相关联的用户 title用于记录一篇文章的标题 content用于记录一篇文章的内容 created_at和updated_at用于记录这篇文章的创建时间和上一次更改的时间  当我在把一个东西(这里以一篇文章为例)存进数据库的时候，其实就是这样的操作，想一下需要储存这个东西的哪些数据，然后列出来，其实就设计了这么样的一个表。
+现在我们知道一条文章的数据有哪些属性了，我们该怎么在数据库里建立这么一个表呢？答案是通过laravel的migrate机制，也就是迁移。
+我通过在根目录执行一条命令：
+php artisan make:migration create_posts_table 然后就能观察到我的项目根目录下的/database/migrations下多了一个文件，文件名应该是2020_0x_xx_xxxxxx_create_yyyyy_table.php,x和你创建这个迁移的时间有关，yyyy就是执行命令make:migration输入的参数，按照规范需要创建一个表的时候一般create_&amp;lt;表名&amp;gt;_table，其中表名按照规范一般是储存的东西的小写负数形式，比如posts。
+创建完的文件是这样的
+&amp;lt;?php use Illuminate\Database\Migrations\Migration; use Illuminate\Database\Schema\Blueprint; use Illuminate\Support\Facades\Schema; class CreatePostsTable extends Migration { /** * Run the migrations. * * @return void */ public function up() { Schema::create(&amp;#39;posts&amp;#39;, function (Blueprint $table) { $table-&amp;gt;bigIncrements(&amp;#39;id&amp;#39;); $table-&amp;gt;timestamps(); }); } /** * Reverse the migrations.</description>
+    </item>
+    
+    <item>
+      <title>Laravel的简要理解(教学笔记)</title>
+      <link>https://blog.x3zvawq.xyz/p/laravel-note-1/</link>
+      <pubDate>Fri, 24 Jan 2020 12:50:42 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/laravel-note-1/</guid>
+      <description>第一次接触MVC这个概念是2018-2019年后端组的授课，当时好像以zlb从SpeedPHP改写的FlashPHP举得例子，然后当时的我也并不知道SpeedPHP是什么，并且现在依旧不知道。
+所谓的MVC，百度一下有很多的blog和什么什么的，甚至百度百科也有这个词条，是一个软件设计模式，然而当时的我看的再多也并没有多么深刻的理解，所以说抛开实践谈理解是有点困难的说。
+然后在寒假参与的寒假项目一个人怼完了一个项目之后倒是对这个有了比较深刻的了解，当时的我就是用FlashPHP做的那个项目，还记得当时分任务的时候有分具体的这个功能，前端我做，后端你做。然而后来觉得再不约定好怎么传值的情况下还不如一个人负责一整个功能(x
+所谓的MVC就是Model-View-Controller 模型-视图-控制器，然而没有实践过的话要明白这个有点困难，所以就先不对每个名词进行解释。
+在用户的浏览器对服务器发起访问的过程中，就是浏览器向服务器发送了一个请求的数据包，然后服务器收到这个请求数据包之后整理好用户需要的东西包在响应数据包里边返回给用户，然后浏览器解析响应数据包展现给用户看他想看的东西。
+上面这段话描述的其实就是一个完整的http请求过程。只是省略了在服务器发生的事情和在浏览器发生的事情，然后这篇文章主要涉及到的会是在服务器发生的那些事。
+以laravel为例，过程大概是这样的
+路由 服务器接收到一个请求
+这个请求的url(也就是链接)假如是
+https://acm.njupt.edu.cn/contest/120?parm=eheihei 在上面的这个链接里面可以理解成包含四个部分，这么看这个url，
+https:// acm.njupt.edu.cn [:443]  /contest/120 ?parm=eheihei
+有四个部分，它们分别是
+ 协议 https://  告诉服务器使用的是什么协议， 常见的基本就http和https 这个可以不加理会   域名 acm.njupt.edu.cn  在网络上的计算机都会有一个ip地址作为让别人找到他的依据 这个域名可以理解成ip地址的助记符，毕竟ip地址一串数字怪难记的 其实这个也不需要多么理会   端口 [:443]   一般http协议通过80端口，然后https协议通过443端口 然后这个端口一般是可以省略的，所以我们也不需要理会   路径 /contest/120  前面三个都不需要理会而我又专门提了url这个概念就意味着后面的这个东西比较重要了 在没有url重写的站点上经常可以见到访问/index.html这种操作 实际上就是浏览器告诉服务器说我希望浏览服务器上根目录的index.html这个文件 然后服务器看到这个文件有，你权限也够，噢那我就直接给你了，这也是一个响应 当然这是一种处理方式，对于这种可以直接给用户的比如html文件，但是有一些是不能直接给用户看的呢，比如说index.php，这个时候服务器就会把他丢给对应的应用服务器，比如php一般丢给php-fpm 然后这个应用服务器处理完之后吧index.php变成一个html丢回给主服务器然后服务器再丢回给用户 其实前面的5个白点点都是突然想起来然后就打出来了(x 在laravel里面，这一个部分会被作为依据由路由把请求解析到一个控制器上，还是后面再说好了   查询串  众所周知，四大天王一般有五个，所以四个部分应该有五个黑点 虽然大家一般把这个部分放到路径里边，但是我觉得还是分开来比较好(x 这里主要是进行GET传值的，其实也不会特别重要。    那么科普就都这里，所谓的路由，就是根据前面的路径来把请求分流，因为一个网站要实现的功能会比较多，所以请求也会有不同的类别，比如这个请求要看主页，另一个请求要看个人中心。
+路由就是一个通过请求的url的路径来判断出这是个什么类别的请求，然后把这个请求丢给对应的部分去处理的行为。
+ 当然，laravel允许直接在路由里面返回请求，但这种操作并不优雅也就是并不推荐这么干</description>
+    </item>
+    
+  </channel>
+</rss>

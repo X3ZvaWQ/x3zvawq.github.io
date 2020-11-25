@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zhcn">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='ES6 允许按照一定模式，从数组和对象中提取值，对变量进行赋值，这被称为解构（Destructuring）。'><title>ES6变量的解构赋值</title>
+
+<link rel='canonical' href='https://blog.x3zvawq.xyz/p/es6-destructuring/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='ES6变量的解构赋值'>
+<meta property='og:description' content='ES6 允许按照一定模式，从数组和对象中提取值，对变量进行赋值，这被称为解构（Destructuring）。'>
+<meta property='og:url' content='https://blog.x3zvawq.xyz/p/es6-destructuring/'>
+<meta property='og:site_name' content='X3ZvaWQ'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='javascript' /><meta property='article:published_time' content='2020-01-23T11:34:14&#43;08:00'/><meta property='article:modified_time' content='2020-01-23T11:34:14&#43;08:00'/>
+<meta name="twitter:title" content="ES6变量的解构赋值">
+<meta name="twitter:description" content="ES6 允许按照一定模式，从数组和对象中提取值，对变量进行赋值，这被称为解构（Destructuring）。">
+    </head>
+    <body class="">
+        <div class="container flex on-phone--column align-items--flex-start extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+
+                
+                    
+                    <img src="/img/avatar_hu8fe5683852e99d12f6b76a6fc629c76f_7029_300x300_resize_q75_box.jpg" width="300"
+                        height="300" class="site-logo" loading="lazy" alt="Avatar">
+                
+
+                
+                    <span class="emoji">🐟</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://blog.x3zvawq.xyz/">X3ZvaWQ</a></h1>
+        <h2 class="site-description">Nothing can be done without faith.</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://blog.x3zvawq.xyz/" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+                <a href="/categories/javascript/">javascript</a>
+            
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/es6-destructuring/">ES6变量的解构赋值</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        ES6 允许按照一定模式，从数组和对象中提取值，对变量进行赋值，这被称为解构（Destructuring）。
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Jan 23, 2020</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>第一次感受过类似的东西应该是在看ks写的NOJ的front utils的时候，项目原先alert框的定义是这个样子的:</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">content</span><span class="p">,</span> <span class="nx">title</span><span class="o">=</span><span class="s2">&#34;Notice&#34;</span><span class="p">,</span> <span class="nx">icon</span><span class="o">=</span><span class="s2">&#34;information-outline&#34;</span><span class="p">,</span> <span class="nx">backdrop</span> <span class="o">=</span> <span class="s2">&#34;static&#34;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">//do something
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div><p>这样子在调用函数的时候大概是这样调用的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;咕咕咕&#39;</span><span class="p">,</span> <span class="s1">&#39;欸嘿嘿&#39;</span><span class="p">);</span>
+</code></pre></div><p>事实证明，没有接触过更好的方法就不会觉得现在的方法不太行，可能是用习惯了，对此也没什么意见甚至觉得这难道不是应该的么。</p>
+<p>然后有了几个新的方法，是这么定义的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">confirm</span> <span class="p">({</span>
+        <span class="nx">content</span><span class="o">=</span><span class="s2">&#34;&#34;</span><span class="p">,</span>
+        <span class="nx">title</span><span class="o">=</span><span class="s2">&#34;Confirm&#34;</span><span class="p">,</span>
+        <span class="nx">icon</span><span class="o">=</span><span class="s2">&#34;information-outline&#34;</span><span class="p">,</span>
+        <span class="nx">backdrop</span><span class="o">=</span><span class="s2">&#34;static&#34;</span><span class="p">,</span>
+        <span class="nx">noText</span><span class="o">=</span><span class="s2">&#34;Cancel&#34;</span><span class="p">,</span>
+        <span class="nx">yesText</span><span class="o">=</span><span class="s2">&#34;OK&#34;</span>
+	<span class="p">}</span><span class="o">=</span><span class="p">{},</span>
+    <span class="nx">callback</span><span class="o">=</span><span class="kd">function</span><span class="p">(</span><span class="nx">deny</span><span class="p">){}){</span>
+    <span class="c1">//do something
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div><p>这样子在调用函数的时候大概是这样调用的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="nx">confirm</span><span class="p">({</span>
+    <span class="nx">content</span><span class="o">:</span> <span class="s1">&#39;咕咕咕?&#39;</span><span class="p">,</span>
+    <span class="nx">noText</span><span class="o">:</span> <span class="s2">&#34;布谷布谷&#34;</span><span class="p">,</span>
+    <span class="nx">yesText</span><span class="o">:</span> <span class="s1">&#39;咕咕咕&#39;</span>
+<span class="p">},</span><span class="nx">deny</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">//do something
+</span><span class="c1"></span><span class="p">});</span>
+</code></pre></div><p>这样子在调用函数的时候传入的值和参数的对应关系就很明了了(x</p>
+<p>与此相反的是，在写php的时候用到array_search(), strpos()等function的时候总是分不清哪个参数该放哪里，以及参数个数比较多的时候也是一个噩梦，然后当有多个省略参数的时候，比如</p>
+<div class="highlight"><pre class="chroma"><code class="language-php" data-lang="php"><span class="k">function</span> <span class="nf">do</span><span class="p">(</span><span class="nx">parmA</span><span class="p">,</span> <span class="nx">parmB</span> <span class="o">=</span> <span class="k">false</span><span class="p">,</span> <span class="nx">parmC</span> <span class="o">=</span> <span class="k">true</span><span class="p">){</span>
+    <span class="c1">//do something
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div><p>如果希望第二个参数使用默认值但是第三个参数使用传入值的话第二个参数就不能留空什么的了(x 虽然这种情况也可以使用php的关联数组来解决，然而这样的话就需要开发者在方法内部进行一些比较复杂的判断。</p>
+<p>如果使用前面js的第二种定义方法就不一样了，想使用默认值的直接不写那个key就好了。</p>
+<p>当时还不明白这是一种什么写法，只觉得十分的优雅，直到有一次深夜的飞机到了目的地没有地铁在一家遇见小面里面用苏菲go打开了阮一峰老师的ES6入门看到了变量的解构赋值，才意识到了，噢！</p>
+<hr>
+<p>常见的操作就是</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">z</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">,</span><span class="nx">c</span><span class="p">];</span>
+</code></pre></div><p>按照顺序对应关系是</p>
+<pre><code>x -&gt; a
+y -&gt; b
+z -&gt; c
+</code></pre><ul>
+<li>
+<p>允许不完全匹配，就是左边的值可以少于右边的值比如<code>let [x,y] = [a,b,c]</code>则是<code>x-&gt;a y-&gt;b</code></p>
+</li>
+<li>
+<p>允许使用默认值，<code>let [x,y = 'A'] = [a,b]</code>当右边对应的值严格等于<code>undefined</code>的时候，左边的元素会取默认值。以及默认值可以引用其他变量，这个比较绕（x</p>
+</li>
+<li>
+<p>当右边的模式不是数组的时候，会尝试把右边转化成一个对象，如果成功并且具有Iterator接口就可以匹配，否则会报错(x</p>
+</li>
+<li>
+<p>支持嵌套比如<code>let [x,[y1,y2],z] = [a,[b1,b2],z]</code></p>
+</li>
+</ul>
+<hr>
+<p>同样的对象也支持解构赋值，正如前面所说的函数参数的定义那个样子</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="p">{</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="p">}</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">a</span><span class="o">:</span> <span class="s1">&#39;aaa&#39;</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span> <span class="s1">&#39;bbb&#39;</span><span class="p">};</span>
+</code></pre></div><p>是</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="p">{</span> <span class="nx">a</span><span class="o">:</span> <span class="nx">aaa</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span> <span class="nx">bbb</span> <span class="p">}</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">a</span><span class="o">:</span> <span class="s1">&#39;aaa&#39;</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span> <span class="s1">&#39;bbb&#39;</span><span class="p">}</span>
+</code></pre></div><p>的简写，阮一峰老师的原文举了比较多的例子，我当时是懵了一下的，左边的模式key和value的变量名傻傻的弄不清楚。</p>
+<p>然后短暂的思考后大概理解就是解构赋值实际上是模式匹配，就是匹配左右两边的模式，然后把value对应的赋值给左边的变量。然后在上面的例子里，模式就是对象这个结构以及key，js通过对象里面相同的key来建立左边和右边的关系，然后把建立起来关系的右边的值赋值给左边。或者说 模式就是key?</p>
+<p>以及这个模式匹配是可以嵌套的，然后可能就会产生比较复杂的情况了(x</p>
+<p>比如阮一峰老师的原文</p>
+<blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="nx">p</span><span class="o">:</span> <span class="p">[</span>
+   <span class="s1">&#39;Hello&#39;</span><span class="p">,</span>
+   <span class="p">{</span> <span class="nx">y</span><span class="o">:</span> <span class="s1">&#39;World&#39;</span> <span class="p">}</span>
+ <span class="p">]</span>
+<span class="p">};</span>
+
+<span class="kd">let</span> <span class="p">{</span> <span class="nx">p</span><span class="o">:</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="p">{</span> <span class="nx">y</span> <span class="p">}]</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">;</span>
+<span class="nx">x</span> <span class="c1">// &#34;Hello&#34;
+</span><span class="c1"></span><span class="nx">y</span> <span class="c1">// &#34;World&#34;
+</span></code></pre></div><p>注意，这时<code>p</code>是模式，不是变量，因此不会被赋值。如果<code>p</code>也要作为变量赋值，可以写成下面这样。</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="nx">p</span><span class="o">:</span> <span class="p">[</span>
+   <span class="s1">&#39;Hello&#39;</span><span class="p">,</span>
+   <span class="p">{</span> <span class="nx">y</span><span class="o">:</span> <span class="s1">&#39;World&#39;</span> <span class="p">}</span>
+ <span class="p">]</span>
+<span class="p">};</span>
+
+<span class="kd">let</span> <span class="p">{</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">p</span><span class="o">:</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="p">{</span> <span class="nx">y</span> <span class="p">}]</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">;</span>
+<span class="nx">x</span> <span class="c1">// &#34;Hello&#34;
+</span><span class="c1"></span><span class="nx">y</span> <span class="c1">// &#34;World&#34;
+</span><span class="c1"></span><span class="nx">p</span> <span class="c1">// [&#34;Hello&#34;, {y: &#34;World&#34;}]
+</span></code></pre></div></blockquote>
+<p>对于后者的情况其实有一些不理解的地方(x</p>
+<blockquote>
+<p>因为前文说过<code>let { a, b } = { a: 'aaa', b: 'bbb'};</code>与<code>let { a: aaa, b: bbb } = { a: 'aaa', b: 'bbb'}</code>是一样的，那么<code>let { p, p: [x, { y }] } = obj;</code>是不是应该和<code>let { p: p, p: [x, { y }] } = obj;</code>是一样的，那么这样的话左边的模式就有两个key都是p是撞了的。</p>
+<p>然后发现跟我想的不大一样，然后ks给我举了一个栗子</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">person</span> <span class="o">:</span> <span class="p">{</span>
+        <span class="nx">name</span> <span class="o">:</span> <span class="s1">&#39;chen&#39;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="kr">const</span> <span class="p">{</span> <span class="nx">person</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span> <span class="p">}</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">person</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+</code></pre></div><p>然后报错说没有产生<code>person</code>这个变量，然后如果写成<code>const { person, person: { name } }</code>就可以了，然后又回到了之前的问题:这么写不就相当于<code>const {person: person, person: { name } }</code>那么是不是还是装了。。然后xy说解构不会处理模式本身，只处理对应的属性。就是<code>person</code>解构<code>obj</code>,而<code>name</code>解构<code>person</code>。说实话这里我并不是很明白(x</p>
+<p>然后我进行了一波注定没有结果的实验，这里就不记录了(x</p>
+<p>然后xy又说解构本质上还是引用对象里的属性 <code>obj.p</code></p>
+<p>然后我就冒出了一个猜想，既然左边的模式不把他处理成一个对象的话那是不是就没有键与值的去别的，实际上就只是模式以键的形式进行表达。</p>
+<p>对于<code>let {p} = obj</code>的话应该直接<code>let p = obj.p</code>, 对于 let {p : p} 实际上也是<code>let p = obj.p</code>, 但是如果是<code>let {p: [x, { y }]} = obj</code>，则应该是 <code>let [x, { y }] = obj.p</code>会再经过一次解构赋值。</p>
+<p>这么想的话好像就没毛病了(x 那就先把猜想放在这里把，或许之后知识面更广了可以再来琢磨这个。</p>
+</blockquote>
+<hr>
+<p>然后文章开头提到的那个函数传参的写法就正是利用了对象的解构赋值。</p>
+<p>然后省略了一堆注意点，以下是用途：</p>
+<ul>
+<li>
+<p>交换变量的值 <code>let [x,y] = [1,2]</code>，则可以通过<code>[y,x] = [x,y]</code>来实现交换</p>
+</li>
+<li>
+<p>从函数返回多个值</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">swap</span> <span class="o">=</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">[</span><span class="nx">y</span><span class="p">,</span><span class="nx">x</span><span class="p">];</span>
+<span class="kd">let</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">swap</span><span class="p">(</span><span class="mi">233</span><span class="p">,</span><span class="mi">555</span><span class="p">);</span>
+</code></pre></div></li>
+<li>
+<p>函数参数的默认值 就如文章开头的做法</p>
+</li>
+<li>
+<p>提取json数据</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">jsonData</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">id</span><span class="o">:</span> <span class="mi">42</span><span class="p">,</span>
+  <span class="nx">status</span><span class="o">:</span> <span class="s2">&#34;OK&#34;</span><span class="p">,</span>
+  <span class="nx">data</span><span class="o">:</span> <span class="p">[</span><span class="mi">867</span><span class="p">,</span> <span class="mi">5309</span><span class="p">]</span>
+<span class="p">};</span>
+  
+<span class="kd">let</span> <span class="p">{</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">data</span><span class="o">:</span> <span class="nx">number</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">jsonData</span><span class="p">;</span>
+</code></pre></div></li>
+<li>
+<p>遍历map解构<code>for (let [key, value] of map)</code></p>
+</li>
+<li>
+<p>导入模块的指定方法<code>const { SourceMapConsumer, SourceNode } = require(&quot;source-map&quot;);</code></p>
+</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/javascript/">javascript</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>CC BY-NC-ND</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title"></h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="">
+    <a href="/p/es6-proxy/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ES6的Proxy</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">&copy; 2020 X3ZvaWQ</section>
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="1.1.0">Stack</a></b> designed by
+        <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true" style="display:none">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<link rel="stylesheet" href="/css/highlight/light.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="/css/highlight/dark.min.css" media="(prefers-color-scheme: dark)">
+
+    </body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zhcn">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='第二天...'><title>饥荒联机版mod开发摸鱼(一)</title>
+
+<link rel='canonical' href='https://blog.x3zvawq.xyz/p/dontstarve-modding-2/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='饥荒联机版mod开发摸鱼(一)'>
+<meta property='og:description' content='第二天...'>
+<meta property='og:url' content='https://blog.x3zvawq.xyz/p/dontstarve-modding-2/'>
+<meta property='og:site_name' content='X3ZvaWQ'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='dontstarve' /><meta property='article:published_time' content='2020-01-26T13:19:56&#43;08:00'/><meta property='article:modified_time' content='2020-01-26T13:19:56&#43;08:00'/>
+<meta name="twitter:title" content="饥荒联机版mod开发摸鱼(一)">
+<meta name="twitter:description" content="第二天...">
+    </head>
+    <body class="">
+        <div class="container flex on-phone--column align-items--flex-start extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+
+                
+                    
+                    <img src="/img/avatar_hu8fe5683852e99d12f6b76a6fc629c76f_7029_300x300_resize_q75_box.jpg" width="300"
+                        height="300" class="site-logo" loading="lazy" alt="Avatar">
+                
+
+                
+                    <span class="emoji">🐟</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://blog.x3zvawq.xyz/">X3ZvaWQ</a></h1>
+        <h2 class="site-description">Nothing can be done without faith.</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://blog.x3zvawq.xyz/" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+                <a href="/categories/dontstarve/">dontstarve</a>
+            
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/dontstarve-modding-2/">饥荒联机版mod开发摸鱼(一)</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        第二天...
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Jan 26, 2020</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>今天又遇到了一个全新的问题，就是把昨天的鱼塘mod配方改了，然后可以做出来鱼塘了，但是这个鱼塘他并不会生产东西了。于是我今天继续琢磨起来了(x</p>
+<p>在每个<code>prefabs</code>的看着很像构造方法的<code>fn</code>内一般能看到许多的<code>inst:AddComponent</code>操作，似乎是给这个实例绑定一个部件，嗯。。也有一种接口的意思，比如这段代码</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="n">inst</span><span class="p">:</span><span class="n">AddComponent</span><span class="p">(</span><span class="s2">&#34;harvestable&#34;</span><span class="p">)</span>
+<span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span><span class="p">:</span><span class="n">SetUp</span><span class="p">(</span><span class="s2">&#34;pondfish&#34;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="kc">nil</span><span class="p">,</span> <span class="n">onharvest</span><span class="p">,</span> <span class="n">updatelevel</span><span class="p">)</span>
+<span class="n">inst</span><span class="p">:</span><span class="n">ListenForEvent</span><span class="p">(</span><span class="s2">&#34;childgoinghome&#34;</span><span class="p">,</span> <span class="n">onchildgoinghome</span><span class="p">)</span>
+</code></pre></div><p>就是给当前实例绑定一个harvestable接口，让这个实例变成一个可被收获的实例，然后第二行进一步设置收获的规则，这里调用了一个<code>harvestable</code>实例的<code>SetUp</code>的函数，这个类的代码在<code>scripts/components/harvestable.lua</code>，代码如下</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nc">Harvestable</span><span class="p">:</span><span class="nf">SetUp</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">max</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">onharvest</span><span class="p">,</span> <span class="n">ongrow</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">SetProduct</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">max</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">SetGrowTime</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">SetOnGrowFn</span><span class="p">(</span><span class="n">ongrow</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">SetOnHarvestFn</span><span class="p">(</span><span class="n">onharvest</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">StartGrowing</span><span class="p">()</span>
+<span class="kr">end</span>
+</code></pre></div><p>各个参数的语义也很清晰，然后看看这个接口是怎么实现的。在开头部分可以看到一部分类的定义：</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">Harvestable</span> <span class="o">=</span> <span class="n">Class</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+        <span class="n">self.inst</span> <span class="o">=</span> <span class="n">inst</span>
+        <span class="n">self.produce</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">self.growtime</span> <span class="o">=</span> <span class="kc">nil</span>
+        <span class="n">self.product</span> <span class="o">=</span> <span class="kc">nil</span>
+        <span class="n">self.ongrowfn</span> <span class="o">=</span> <span class="kc">nil</span>
+        <span class="n">self.maxproduce</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="kr">end</span><span class="p">,</span>
+    <span class="kc">nil</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="n">produce</span> <span class="o">=</span> <span class="n">onproduce</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div><p>不得不说，<code>lua</code>这个闭包是真的很丑,虽然我也不清楚这个能不能算得上是一种闭包，但是从代码大概可以知道这个类会有哪些属性，好的我们继续。回到<code>Harvestable:SetUp</code>方法，可以看到方法体内部有5行。前面四行都是设置一些类属性的，然后最后调用了一个没有参数的方法，好的 那个很可疑，遂找到方法体：</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nc">Harvestable</span><span class="p">:</span><span class="nf">StartGrowing</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">StopGrowing</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">growtime</span> <span class="o">=</span> <span class="n">time</span> <span class="ow">or</span> <span class="n">self.growtime</span>
+    <span class="kr">if</span> <span class="n">growtime</span> <span class="kr">then</span>
+        <span class="n">self.task</span> <span class="o">=</span> <span class="n">self.inst</span><span class="p">:</span><span class="n">DoTaskInTime</span><span class="p">(</span><span class="n">growtime</span><span class="p">,</span> <span class="kr">function</span><span class="p">()</span> <span class="n">self</span><span class="p">:</span><span class="n">Grow</span><span class="p">()</span> <span class="kr">end</span><span class="p">,</span> <span class="s2">&#34;grow&#34;</span><span class="p">)</span>
+        <span class="n">self.targettime</span> <span class="o">=</span> <span class="n">GetTime</span><span class="p">()</span> <span class="o">+</span> <span class="n">growtime</span>
+    <span class="kr">end</span>
+<span class="kr">end</span>
+</code></pre></div><p>大意是，如果<code>growtime</code>有值的话就执行一个<code>inst:DoTaskInTime</code>，那么问题来了，这个代码好像不好找。</p>
+<p>好了我又回来了，通过全局搜索<code>DoTaskInTime(time</code>找到了一个疑似该方法的定义，位于<code>scripts/entityscript.lua</code>文件内，代码如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nc">EntityScript</span><span class="p">:</span><span class="nf">DoTaskInTime</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="p">...)</span>
+    <span class="c1">--print (&#34;DO TASK IN TIME&#34;, time, self)</span>
+    <span class="kr">if</span> <span class="ow">not</span> <span class="n">self.pendingtasks</span> <span class="kr">then</span>
+        <span class="n">self.pendingtasks</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="kr">end</span>
+    
+    <span class="kd">local</span> <span class="n">per</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">:</span><span class="n">ExecuteInTime</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">self.GUID</span><span class="p">,</span> <span class="n">self</span><span class="p">,</span> <span class="p">...)</span>
+    <span class="n">self.pendingtasks</span><span class="p">[</span><span class="n">per</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="n">per.onfinish</span> <span class="o">=</span> <span class="n">task_finish</span> <span class="c1">-- function() if self and self.pendingtasks then self.pendingtasks[per] = nil end end</span>
+    <span class="kr">return</span> <span class="n">per</span>
+<span class="kr">end</span>
+</code></pre></div><p>对不起，看着有点复杂，涉及的可能会有点多，所以我决定先掠过一下，留下一个猜测根据<code>scheduler:ExecuteInTime</code>这是一个让某个函数在某个时间点后执行的方法。</p>
+<p>然后在<code>StartGrowing(time)</code>内传入的是一个<code>function() self:Grow() end</code>的很像闭包的东西，好的然后找到中间那个方法的代码：</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nc">Harvestable</span><span class="p">:</span><span class="nf">Grow</span><span class="p">()</span>
+    <span class="kr">if</span> <span class="n">self.produce</span> <span class="o">&lt;</span> <span class="n">self.maxproduce</span> <span class="kr">then</span>
+        <span class="n">self.produce</span> <span class="o">=</span> <span class="n">self.produce</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="kr">if</span> <span class="n">self.ongrowfn</span> <span class="kr">then</span>
+            <span class="n">self.ongrowfn</span><span class="p">(</span><span class="n">self.inst</span><span class="p">,</span> <span class="n">self.produce</span><span class="p">)</span>
+        <span class="kr">end</span>
+        <span class="kr">if</span> <span class="n">self.produce</span> <span class="o">&lt;</span> <span class="n">self.maxproduce</span> <span class="kr">then</span>
+            <span class="n">self</span><span class="p">:</span><span class="n">StartGrowing</span><span class="p">()</span>
+        <span class="kr">else</span>
+            <span class="n">self</span><span class="p">:</span><span class="n">StopGrowing</span><span class="p">()</span>
+        <span class="kr">end</span>
+    <span class="kr">end</span>
+<span class="kr">end</span>
+</code></pre></div><p>是一个非常简单的逻辑，所以对于这个接口是怎么运行的就大概明白了。</p>
+<p>在前面的<code>inst.components.harvestable:SetUp(&quot;pondfish&quot;, 3, nil, onharvest, updatelevel)</code>内第三个时间参数是<code>nil</code>所以不会长，但是之前没改mod文件之前有蜜蜂会去采蜜，然后就会有鱼了。</p>
+<p>但是在<code>harvest</code>部分还有第三行<code>inst:ListenForEvent(&quot;childgoinghome&quot;, onchildgoinghome)</code>，意思似乎是添加一个<code>Listener</code>来监听孩子回家，然后第二个参数好像在哪里见过的方法，遂在这个mod的代码内搜索:</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="kr">function</span> <span class="nf">onchildgoinghome</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">data.child</span> <span class="ow">and</span> <span class="n">data.child</span><span class="p">.</span><span class="n">components.pollinator</span> <span class="ow">and</span> <span class="n">data.child</span><span class="p">.</span><span class="n">components.pollinator</span><span class="p">:</span><span class="n">HasCollectedEnough</span><span class="p">()</span> <span class="kr">then</span>
+        <span class="kr">if</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span> <span class="kr">then</span>
+            <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span><span class="p">:</span><span class="n">Grow</span><span class="p">()</span>
+        <span class="kr">end</span>
+    <span class="kr">end</span>
+<span class="kr">end</span>
+</code></pre></div><p>哦豁，他直接在这里调用了<code>harvestable</code>的<code>Grow</code>方法。所以意思是只要蜜蜂去采蜜了，那么就能有东西生成了，但是现在的问题是它根本就不产生蜜蜂。</p>
+<p>所以猜测问题有可能是在生蜜蜂那里</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="n">inst</span><span class="p">:</span><span class="n">AddComponent</span><span class="p">(</span><span class="s2">&#34;childspawner&#34;</span><span class="p">)</span>
+<span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner.childname</span> <span class="o">=</span> <span class="s2">&#34;bee&#34;</span>
+<span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span><span class="p">:</span><span class="n">SetRegenPeriod</span><span class="p">(</span><span class="n">TUNING.BEEBOX_REGEN_TIME</span><span class="p">)</span>
+<span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span><span class="p">:</span><span class="n">SetSpawnPeriod</span><span class="p">(</span><span class="n">TUNING.BEEBOX_RELEASE_TIME</span><span class="p">)</span>
+<span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span><span class="p">:</span><span class="n">SetMaxChildren</span><span class="p">(</span><span class="n">TUNING.BEEBOX_BEES</span><span class="p">)</span>  
+
+<span class="kr">if</span> <span class="n">TheWorld.state</span><span class="p">.</span><span class="n">isday</span> <span class="ow">and</span> <span class="n">TheWorld.state</span><span class="p">.</span><span class="n">issummer</span> <span class="kr">then</span>
+    <span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span><span class="p">:</span><span class="n">StartSpawning</span><span class="p">()</span>
+<span class="kr">end</span>
+</code></pre></div><p>嗯。。？这里怎么混进了一个判断语句？看语义是如果是在夏天的白天就开始生动物</p>
+<p>感觉应该还有别的地方有这个<code>StartSpawning</code>,不然在其它季节建造的不就炸了。然后搜索<code>StartSpawning</code>,找到了这个方法：</p>
+<div class="highlight"><pre class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="kr">function</span> <span class="nf">OnIsDay</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">isday</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="ow">not</span> <span class="n">isday</span> <span class="kr">then</span>
+        <span class="kr">if</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span> <span class="ow">and</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable.growtime</span> <span class="kr">then</span>
+            <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span><span class="p">:</span><span class="n">StopGrowing</span><span class="p">()</span>
+        <span class="kr">end</span>
+        <span class="kr">if</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span> <span class="kr">then</span>
+            <span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span><span class="p">:</span><span class="n">StopSpawning</span><span class="p">()</span>
+        <span class="kr">end</span>
+    <span class="kr">elseif</span> <span class="ow">not</span> <span class="n">TheWorld.state</span><span class="p">.</span><span class="n">iswinter</span> <span class="kr">then</span>
+        <span class="kr">if</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span> <span class="ow">and</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable.growtime</span> <span class="kr">then</span>
+            <span class="n">inst.components</span><span class="p">.</span><span class="n">harvestable</span><span class="p">:</span><span class="n">StartGrowing</span><span class="p">()</span>
+        <span class="kr">end</span>
+        <span class="kr">if</span> <span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span> <span class="kr">then</span>
+            <span class="n">inst.components</span><span class="p">.</span><span class="n">childspawner</span><span class="p">:</span><span class="n">StartSpawning</span><span class="p">()</span>
+        <span class="kr">end</span>
+    <span class="kr">end</span>
+<span class="kr">end</span>
+</code></pre></div><p>逻辑有些混乱，找找在哪里调用了这个方法吧</p>
+<pre><code>inst:WatchWorldState(&quot;isday&quot;, OnIsDay)
+</code></pre><p>感觉又是一个<code>Listener</code>，或者说<code>Watcher</code>？那么大概就明白了？ 每个白天的开始都会执行一次这个方法？</p>
+<p>然后在这个方法里面控制了怎么产生产物。</p>
+<p>除此之外也有<code>onsleep</code>和<code>stopsleep</code>的方法在里面控制了通过<code>harvestable</code>产生产品，并且在构造方法内把这两个方法绑定到了<code>entitysleep</code>和<code>entitywake</code>两个<code>Listener</code>上，然而这两个<code>Listener</code>什么时候触发我也完全不知道。</p>
+<p>剩下的东西明天再写，咕咕咕</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/dontstarve/">dontstarve</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>CC BY-NC-ND</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title"></h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="">
+    <a href="/p/dontstarve-modding-1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">饥荒联机版mod开发摸鱼(一)</h2>
+        </div>
+    </a>
+</article>
+                
+                    
+<article class="">
+    <a href="/p/dontstarve-linux-server/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Linux上的饥荒服务器搭建</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">&copy; 2020 X3ZvaWQ</section>
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="1.1.0">Stack</a></b> designed by
+        <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true" style="display:none">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<link rel="stylesheet" href="/css/highlight/light.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="/css/highlight/dark.min.css" media="(prefers-color-scheme: dark)">
+
+    </body>
+</html>

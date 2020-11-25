@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>template on X3ZvaWQ</title>
+    <link>https://blog.x3zvawq.xyz/categories/template/</link>
+    <description>Recent content in template on X3ZvaWQ</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhcn</language>
+    <lastBuildDate>Tue, 26 Mar 2019 08:47:11 +0100</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/categories/template/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Title</title>
+      <link>https://blog.x3zvawq.xyz/p/test-chinese/</link>
+      <pubDate>Tue, 26 Mar 2019 08:47:11 +0100</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/test-chinese/</guid>
+      <description>  image 
+{ &amp;#34;hello&amp;#34;: &amp;#34;world&amp;#34; } </description>
+    </item>
+    
+  </channel>
+</rss>

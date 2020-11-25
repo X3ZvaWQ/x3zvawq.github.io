@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zhcn">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='ES6的代理？Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。'><title>ES6的Proxy</title>
+
+<link rel='canonical' href='https://blog.x3zvawq.xyz/p/es6-proxy/'>
+
+<link rel="stylesheet" href="/scss/style.min.css"><meta property='og:title' content='ES6的Proxy'>
+<meta property='og:description' content='ES6的代理？Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。'>
+<meta property='og:url' content='https://blog.x3zvawq.xyz/p/es6-proxy/'>
+<meta property='og:site_name' content='X3ZvaWQ'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='javascript' /><meta property='article:published_time' content='2020-01-27T23:28:26&#43;08:00'/><meta property='article:modified_time' content='2020-01-27T23:28:26&#43;08:00'/>
+<meta name="twitter:title" content="ES6的Proxy">
+<meta name="twitter:description" content="ES6的代理？Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。">
+    </head>
+    <body class="">
+        <div class="container flex on-phone--column align-items--flex-start extended article-page with-toolbar">
+            <aside class="sidebar left-sidebar sticky">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header class="site-info">
+        
+            <figure class="site-avatar">
+                
+
+                
+                    
+                    <img src="/img/avatar_hu8fe5683852e99d12f6b76a6fc629c76f_7029_300x300_resize_q75_box.jpg" width="300"
+                        height="300" class="site-logo" loading="lazy" alt="Avatar">
+                
+
+                
+                    <span class="emoji">🐟</span>
+                
+            </figure>
+        
+        <h1 class="site-name"><a href="https://blog.x3zvawq.xyz/">X3ZvaWQ</a></h1>
+        <h2 class="site-description">Nothing can be done without faith.</h2>
+    </header>
+
+    <ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search'>
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+    </ol>
+</aside>
+
+            <main class="main full-width">
+    <div id="article-toolbar">
+        <a href="https://blog.x3zvawq.xyz/" class="back-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="15 6 9 12 15 18" />
+</svg>
+
+
+
+            <span>Back</span>
+        </a>
+    </div>
+
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+                <a href="/categories/javascript/">javascript</a>
+            
+        
+    </header>
+    
+
+    <h2 class="article-title">
+        <a href="/p/es6-proxy/">ES6的Proxy</a>
+    </h2>
+
+    
+    <h3 class="article-subtitle">
+        ES6的代理？Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。
+    </h3>
+    <footer class="article-time">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <time class="article-time--published">Jan 27, 2020</time>
+    </footer></div>
+</header>
+
+    <section class="article-content">
+    <p>前段时间看阮一峰老师的<code>es6</code>入门向大家提了一点关于解构赋值的问题之后，有个学长说<code>es6</code>最难懂的应该是<code>Proxy</code>了，所以说有难度的东西就应该挑战着玩一下的说。</p>
+<p>然后看了一下觉得怪有意思的。所谓的<code>Proxy</code>，是一个用于修改某些操作的默认行为，原话是：</p>
+<blockquote>
+<p>Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。</p>
+</blockquote>
+<p>说实话，我并不是很能明白这段话说了什么。简单的学习来看，<code>Proxy</code>给了我一种人如其名的感觉，以网络为原型的话相当于在目标主机与请求方之间建立了一个代理，然后可以肆意的操作两边来往的数据。又有点像<code>laravel</code>的中间件，又有点像<code>python</code>的装饰器。</p>
+<p>一个简单的例子</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">person</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;咕咕咕&#39;</span><span class="p">,</span>
+    <span class="nx">age</span><span class="o">:</span> <span class="mi">38</span>
+<span class="p">}</span>
+<span class="kd">let</span> <span class="nx">proxy</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Proxy</span><span class="p">(</span><span class="nx">person</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">get</span> <span class="o">:</span> <span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">key</span> <span class="o">==</span> <span class="s1">&#39;age&#39;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">target</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">18</span> <span class="o">?</span> <span class="mi">18</span> <span class="o">:</span> <span class="nx">target</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span> 
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+            <span class="k">return</span> <span class="nx">target</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">})</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">proxy</span><span class="p">.</span><span class="nx">age</span><span class="p">)</span> <span class="c1">//18
+</span></code></pre></div><p>这里新建了一个<code>Proxy</code>实例，定义了一个针对获取<code>person</code>对象的属性的拦截行为，即<code>get</code></p>
+<p>一般而言，调用person对象的属性会这么写成这样：<code>person.age</code>，其中的<code>age</code>就是属性名，然后<code>person</code>是对象，然后在<code>Proxy</code>也就是代理内部的话就可以获取到这个对象以及调用属性名，就是<code>target</code>和<code>key</code>。</p>
+<p>然后再调用<code>proxy</code>的<code>get</code>方法的时候实际上就执行了定义在<code>Proxy</code>的<code>get</code>方法。</p>
+<p>写在Proxy内的方法的参数名字并不重要，顺序即可似乎。</p>
+<p>Proxy支持的拦截操作似乎较多，但是很多都是目前的我不甚熟悉的，所以只做摘录(x</p>
+<blockquote>
+<ul>
+<li><code>get(target, propKey, receiver)</code>：拦截对象属性的读取，比如<code>proxy.foo</code>和<code>proxy['foo']</code>。</li>
+<li><code>set(target, propKey, value, receiver)</code>：拦截对象属性的设置，比如<code>proxy.foo = v</code>或<code>proxy['foo'] = v</code>，返回一个布尔值。</li>
+<li><code>has(target, propKey)</code>：拦截<code>propKey in proxy</code>的操作，返回一个布尔值。</li>
+<li><code>deleteProperty(target, propKey)</code>：拦截<code>delete proxy[propKey]</code>的操作，返回一个布尔值。</li>
+<li><code>ownKeys(target)</code>：拦截<code>Object.getOwnPropertyNames(proxy)</code>、<code>Object.getOwnPropertySymbols(proxy)</code>、<code>Object.keys(proxy)</code>、<code>for...in</code>循环，返回一个数组。该方法返回目标对象所有自身的属性的属性名，而<code>Object.keys()</code>的返回结果仅包括目标对象自身的可遍历属性。</li>
+<li><code>getOwnPropertyDescriptor(target, propKey)</code>：拦截<code>Object.getOwnPropertyDescriptor(proxy, propKey)</code>，返回属性的描述对象。</li>
+<li><code>defineProperty(target, propKey, propDesc)</code>：拦截<code>Object.defineProperty(proxy, propKey, propDesc）</code>、<code>Object.defineProperties(proxy, propDescs)</code>，返回一个布尔值。</li>
+<li><code>preventExtensions(target)</code>：拦截<code>Object.preventExtensions(proxy)</code>，返回一个布尔值。</li>
+<li><code>getPrototypeOf(target)</code>：拦截<code>Object.getPrototypeOf(proxy)</code>，返回一个对象。</li>
+<li><code>isExtensible(target)</code>：拦截<code>Object.isExtensible(proxy)</code>，返回一个布尔值。</li>
+<li><code>setPrototypeOf(target, proto)</code>：拦截<code>Object.setPrototypeOf(proxy, proto)</code>，返回一个布尔值。如果目标对象是函数，那么还有两种额外操作可以拦截。</li>
+<li><code>apply(target, object, args)</code>：拦截 Proxy 实例作为函数调用的操作，比如<code>proxy(...args)</code>、<code>proxy.call(object, ...args)</code>、<code>proxy.apply(...)</code>。</li>
+<li><code>construct(target, args)</code>：拦截 Proxy 实例作为构造函数调用的操作，比如<code>new proxy(...args)</code>。</li>
+</ul>
+</blockquote>
+<hr>
+<p>对于<code>get</code>方法而言,允许传入的三个参数分别是<code>target</code>，<code>key</code>，<code>receiver</code>，分别代表着</p>
+<ul>
+<li>代理的目标</li>
+<li>获取的参数</li>
+<li>读操作所在对象(一般就是<code>proxy</code>的实例)</li>
+</ul>
+<p>然后有些注意事项就是即使在<code>proxy</code>内也不能修改来自<code>target</code>的<code>read-only and non-configurable</code>，至于为什么要有这个规则不是很符合我的理解。这不符合一个作为中间件或者代理服务器的行为，说明我对他的理解出现了一些偏差。</p>
+<p>比如这个</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperties</span><span class="p">({},{</span>
+    <span class="nx">age</span> <span class="o">:</span> <span class="p">{</span>
+        <span class="nx">value</span> <span class="o">:</span> <span class="mi">19</span><span class="p">,</span>
+        <span class="nx">writable</span> <span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nx">configurable</span><span class="o">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="nx">name</span> <span class="o">:</span> <span class="p">{</span>
+        <span class="nx">value</span> <span class="o">:</span> <span class="s2">&#34;咕咕咕&#34;</span><span class="p">,</span>
+        <span class="nx">writable</span> <span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nx">configurable</span><span class="o">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+
+<span class="kd">let</span> <span class="nx">proxy</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Proxy</span><span class="p">(</span><span class="nx">x</span><span class="p">,{</span>
+    <span class="nx">get</span><span class="o">:</span> <span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="nx">k</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="mi">18</span>
+<span class="p">})</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">proxy</span><span class="p">.</span><span class="nx">age</span><span class="p">)</span>
+</code></pre></div><p>这样的代码当<code>x</code>的<code>age</code>确实是<code>18</code>的时候，可以正常返回<code>18</code>。</p>
+<p>但是当<code>x.age</code>不是18的时候则会遇到报错：</p>
+<pre><code>TypeError: 'get' on proxy: property 'age' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value (expected '19' but got '18')
+</code></pre><p>让人感到有些困惑。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/javascript/">javascript</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>CC BY-NC-ND</span>
+    </section>
+    </footer>
+
+    
+</article>
+
+    <aside class="related-contents--wrapper">
+    
+    
+        <h2 class="section-title"></h2>
+        <div class="related-contents">
+            <div class="flex article-list--tile">
+                
+                    
+<article class="">
+    <a href="/p/es6-destructuring/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ES6变量的解构赋值</h2>
+        </div>
+    </a>
+</article>
+                
+            </div>
+        </div>
+    
+</aside>
+
+
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">&copy; 2020 X3ZvaWQ</section>
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="1.1.0">Stack</a></b> designed by
+        <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true" style="display:none">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"
+    integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin="anonymous"></script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<link rel="stylesheet" href="/css/highlight/light.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="/css/highlight/dark.min.css" media="(prefers-color-scheme: dark)">
+
+    </body>
+</html>

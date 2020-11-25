@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>X3ZvaWQ</title>
+        <link>https://blog.x3zvawq.xyz/</link>
+        <description>Recent content on X3ZvaWQ</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zhcn</language>
+        <lastBuildDate>Wed, 05 Feb 2020 18:29:44 +0800</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>laravel服务容器</title>
+        <link>https://blog.x3zvawq.xyz/p/laravel-container/</link>
+        <pubDate>Wed, 05 Feb 2020 18:29:44 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/laravel-container/</guid>
+        <description>&lt;p&gt;laravel用了也挺久的了，曾经也想过深入研究读读源码什么的，但是尝试过几次都从心了。&lt;/p&gt;
+&lt;p&gt;正好寒假无聊得慌，然后就准备深入一点琢磨一下。&lt;/p&gt;
+&lt;p&gt;从服务容器开始(x 当初看laravel中文文档的时候，开头就是核心架构里面的服务容器什么的，把自己给怼自闭了&lt;/p&gt;
+&lt;p&gt;所以后来也没成功弄懂，后来倒是写过一次&lt;code&gt;IoC&lt;/code&gt;的实例。但是到现在也忘光了(x&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;依赖注入和控制反转是对同一件事情的不同描述，它们描述的角度不同。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;依赖注入是从应用程序的角度在描述，应用程序依赖容器创建并注入它所需要的外部资源。&lt;/li&gt;
+&lt;li&gt;控制反转是从容器的角度在描述，容器控制应用程序，由容器反向的向应用程序注入应用程序所需要的外部资源。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这个可能并不一定看的太懂，但是之所以要使用这一种模式关键还是为了解耦。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;0-常规操作&#34;&gt;#0 常规操作&lt;/h2&gt;
+&lt;p&gt;面向对象的程序开发离不开类、接口、对象这些东西。然后万物皆对象，房子可以是一个对象，人也是可以是一个对象，那么人在房子里。这两个对象就扯上关系了，他们之间就存在着一个依赖。&lt;/p&gt;
+&lt;p&gt;就用上面的例子，房子，人这个时候可能会这么写：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Human&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;age&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;House&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$human&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;human&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Human&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;18&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;对于小型项目寥寥几个类这样的依赖并不会发生什么不愉悦的事情，就算业务发生变化有什么需要修改的事情也只需要修改寥寥几个地方。比如在上面的地方只有在House类的内部有一个&lt;code&gt;new People&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;但是如果一个项目大了起来，类开始多了起来，然后依赖变得复杂起来。从一对一变成一对多甚至多对多的时候就是噩梦一般的体验了。比如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Human&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;age&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Dog&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;age&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Cat&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;age&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;House&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$human&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$dog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$cat&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;human&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Human&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;18&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;dog&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Dog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;汪汪汪&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;cat&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Cat&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;喵喵喵&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;1-工厂模式-factory-pattern&#34;&gt;#1 工厂模式 Factory Pattern&lt;/h2&gt;
+&lt;p&gt;在上面的代码中，如果Cat类的构造函数，或者类名什么的发生了变化，那么就需要修改House的代码，可能发感觉不到什么，那么如果有其他的东西也对猫有依赖呢？比如有一个&lt;code&gt;CatHouse&lt;/code&gt;类，有一个&lt;code&gt;CatClimb&lt;/code&gt;类，或者更多？那么是不是意味着修改一个Cat一个构造函数就需要修改多个类？这将会是多么糟糕的体验？&lt;/p&gt;
+&lt;p&gt;所以为了避免这种事情，后来就有人提出了工厂模式，什么叫工厂模式呢？Show code。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;BiologyFactory&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;make&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;switch&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;case&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;human&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Human&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]);&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;case&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;dog&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Dog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]);&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;case&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;cat&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Cat&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]);&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后呢，房子类就可以这么写了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;House&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$factory&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;BiologyFactory&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;foreach&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$members&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$member&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+            &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$factory&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;make&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$member&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;试想，当我们这么操作之后，如果我们修改了Cat类，Dog类还需要修改House类的代码嘛，很明显是不需要的。又如同我们之前说的如果又多个类同时依赖Cat类，我们修改了Cat类的构造方法也再无必要去修改多个依赖了他的类，我们需要做的只有修改工厂类即可。&lt;/p&gt;
+&lt;p&gt;在这个过程中，我们相当于在一对多或者对多对的依赖中添加了一层工厂，原本类直接对类产生依赖，现在我们在类与类之间添加了一个工厂，让类依赖工厂，通过工厂来获取原来依赖的对象。这么一来是不是舒服很多了呢？&lt;/p&gt;
+&lt;p&gt;然而人们追求优雅的脚步是永无止尽的，既然可以做到像上面的类只需要依赖一个类，那么有没有可能做到完全的解耦呢？不管怎么修改我们都不需要去修改类的代码。&lt;/p&gt;
+&lt;p&gt;比如我们现在如果修改了Cat类，我们只需要修改工厂类的代码即可，那么有没有可能不需要修改工厂类的代码呢？再或者说，如果添加了更多的生物类我们就需要去修改工厂类的代码为switch添加更多的case。有没有可能不修改类的代码而是通过其他的方法来实现呢？&lt;/p&gt;
+&lt;p&gt;以及，这样的工厂真的就是最优雅的了吗？如果同一个生物有不同的构造方法，那么该怎么处理呢？是不是同一个类需要多个case来进行处理呢？这是不是意味着工厂生产东西的对象类型有些单一了呢？&lt;/p&gt;
+&lt;p&gt;所以，上述的问题都会被解决。&lt;/p&gt;
+&lt;h2 id=&#34;2-依赖注入-dependency-injection&#34;&gt;#2 依赖注入 Dependency Injection&lt;/h2&gt;
+&lt;p&gt;类对类存在依赖，我们希望的是解耦，即修改一个类的代码不需要去改动其他类的代码，在前面的工厂模式中已经很接近完成这个目标了，无论怎么修改类的代码我们都只需要修改工厂类的代码即可完成适配。&lt;/p&gt;
+&lt;p&gt;类对类存在依赖，实际上就是在这个类里面我们会需要一个一个类的实例来干一些事情，那么除了在自己的内部产生还有没有别的办法来获得一个对象呢？有的，正如#2的标题所说，注入！&lt;/p&gt;
+&lt;p&gt;什么叫注入呢？只要不是在类的内部new或者工厂make的实例，而是通过参数或者其他形式获取的实例其实都叫注入。&lt;/p&gt;
+&lt;p&gt;比如:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;House&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;protected&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$memebrs&lt;/span&gt;
+    
+	&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+        &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;members&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样是通过构造函数创建实例的时候就注入了一个已经创建好的对象，当然不可能需要我们手动去实例化对象，那和一开始#0的常规操作有什么区别呢？&lt;/p&gt;
+&lt;p&gt;前面也说过，&lt;strong&gt;依赖注入是从应用程序的角度在描述，应用程序依赖容器创建并注入它所需要的外部资源。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在初始化类的时候，依赖容器来实例化这一个&lt;code&gt;House&lt;/code&gt;类，那么该如何让容器知道怎么实例化这个类呢？或者说再明确一点，怎么样让容器知道用什么参数来&lt;code&gt;new&lt;/code&gt;一个&lt;code&gt;House&lt;/code&gt;。我们可以规定只能传入一个固定的类的实例来构造我们的&lt;code&gt;House&lt;/code&gt;，只需要这么修改构造函数：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__construct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Human&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$this&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;members&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$members&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但我们肯定不希望这个房子里只有人，&lt;/p&gt;
+&lt;p&gt;则会用到一个面向对象的语言都该有的概念——接口。接口是一种约束形式，其中只包括成员定义，不包含成员实现的内容。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Laravel的Eloquent(教学笔记)</title>
+        <link>https://blog.x3zvawq.xyz/p/laravel-note-2/</link>
+        <pubDate>Fri, 31 Jan 2020 18:38:53 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/laravel-note-2/</guid>
+        <description>&lt;p&gt;在对&lt;code&gt;laravel&lt;/code&gt;的理解一文中，结尾提到了一下&lt;code&gt;Model&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;然后考虑到篇幅限制，以及暂时用不到，所以就没有做更详细的阐述&lt;/p&gt;
+&lt;p&gt;说到&lt;code&gt;Model&lt;/code&gt;，就必然离不开数据库，因为Model就是一个后端应用的数据层。他的位置应该是在控制器与数据库之间，负责的部分是直接与数据库进行交互，返回数据给控制器。&lt;/p&gt;
+&lt;p&gt;在知道model是干什么的情况下，我们需要做什么呢？&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;我们现在的数据库还没创建好，所以首先创建好数据库&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;注意，如果使用mysql的话，关于数据库的部分配置在&lt;code&gt;.env&lt;/code&gt;文件内:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=root
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;内，配置好用户名和密码之后，我们需要做的就是创建一个和上面&lt;code&gt;DB_DATABASE&lt;/code&gt;配置项同名的数据库。&lt;/p&gt;
+&lt;p&gt;如果使用&lt;code&gt;navicat&lt;/code&gt;或者&lt;code&gt;phpAdmin&lt;/code&gt;可能会比较轻松，如果使用mysql命令的话大概是登陆进数据库之后&lt;code&gt;create database laravel&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;然后剩下的部分，都通过php代码完成。&lt;/p&gt;
+&lt;p&gt;假设存在这样的一个表：&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+		&lt;a href=&#34;https://blog.x3zvawq.xyz/p/laravel-note-2/1.png&#34; data-size=&#34;766x242&#34;&gt;
+			&lt;img srcset=&#34;https://blog.x3zvawq.xyz/p/laravel-note-2/1_hu428318b9d39774b97b933544a56c3d97_21790_480x0_resize_box_2.png 480w, https://blog.x3zvawq.xyz/p/laravel-note-2/1_hu428318b9d39774b97b933544a56c3d97_21790_1024x0_resize_box_2.png 1024w&#34;
+				src=&#34;https://blog.x3zvawq.xyz/p/laravel-note-2/1.png&#34; width=&#34;766&#34; height=&#34;242&#34; loading=&#34;lazy&#34;
+				alt=&#34;image-20200130190618309&#34;&gt;
+		&lt;/a&gt;
+		
+		&lt;figcaption&gt;image-20200130190618309&lt;/figcaption&gt;
+		
+	&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;这个表有6个字段，分别是&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;id&lt;/code&gt;作为每一条数据的唯一识别编号&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;user_id&lt;/code&gt;用来标识与这个post相关联的用户&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;title&lt;/code&gt;用于记录一篇文章的标题&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;content&lt;/code&gt;用于记录一篇文章的内容&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;created_at&lt;/code&gt;和&lt;code&gt;updated_at&lt;/code&gt;用于记录这篇文章的创建时间和上一次更改的时间&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当我在把一个东西(这里以一篇文章为例)存进数据库的时候，其实就是这样的操作，想一下需要储存这个东西的哪些数据，然后列出来，其实就设计了这么样的一个表。&lt;/p&gt;
+&lt;p&gt;现在我们知道一条文章的数据有哪些属性了，我们该怎么在数据库里建立这么一个表呢？答案是通过laravel的migrate机制，也就是迁移。&lt;/p&gt;
+&lt;p&gt;我通过在根目录执行一条命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;php artisan make:migration create_posts_table
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后就能观察到我的项目根目录下的&lt;code&gt;/database/migrations&lt;/code&gt;下多了一个文件，文件名应该是&lt;code&gt;2020_0x_xx_xxxxxx_create_yyyyy_table.php&lt;/code&gt;,x和你创建这个迁移的时间有关，&lt;code&gt;yyyy&lt;/code&gt;就是执行命令&lt;code&gt;make:migration&lt;/code&gt;输入的参数，按照规范需要创建一个表的时候一般&lt;code&gt;create_&amp;lt;表名&amp;gt;_table&lt;/code&gt;，其中表名按照规范一般是储存的东西的小写负数形式，比如&lt;code&gt;posts&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;创建完的文件是这样的&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;?&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;php&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Illuminate\Database\Migrations\Migration&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Illuminate\Database\Schema\Blueprint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Illuminate\Support\Facades\Schema&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;CreatePostsTable&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;extends&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Migration&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;sd&#34;&gt;/**
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     * Run the migrations.
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     *
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     * @return void
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     */&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;up&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;Schema&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;create&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;posts&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Blueprint&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+            &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;bigIncrements&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+            &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;timestamps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;});&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+    &lt;span class=&#34;sd&#34;&gt;/**
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     * Reverse the migrations.
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     *
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     * @return void
+&lt;/span&gt;&lt;span class=&#34;sd&#34;&gt;     */&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;down&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;Schema&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;dropIfExists&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;posts&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这是一个继承了&lt;code&gt;Migration&lt;/code&gt;的类，他的里面有两个方法，一个是&lt;code&gt;up&lt;/code&gt;一个是&lt;code&gt;down&lt;/code&gt;，其中up是在执行迁移的时候调用的，&lt;code&gt;down&lt;/code&gt;是在回滚迁移的时候用的。&lt;/p&gt;
+&lt;p&gt;然后需要修改的部分就是&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nx&#34;&gt;Schema&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;create&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;posts&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Blueprint&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;bigIncrements&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;timestamps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;被包在function中间的部分，按照前面的表结构，我应该这么写：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nx&#34;&gt;Schema&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;create&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;posts&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Blueprint&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;bigIncrements&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;bigInteger&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;user_id&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;string&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;string&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;content&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;nv&#34;&gt;$table&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;timestamps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;至于为什么这么写自己比较与观察，然后查看&lt;a class=&#34;link&#34; href=&#34;https://learnku.com/docs/laravel/6.x/migrations/5173&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方文档的数据库迁移&lt;/a&gt;部分&lt;/p&gt;
+&lt;p&gt;设计好表之后执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;php artisan migrate
+&lt;/code&gt;&lt;/pre&gt;&lt;blockquote&gt;
+&lt;p&gt;关于前面提到的回滚：比如当我创建了一个表，并且已经迁移进了数据库发现少写了一些属性并且代码没有上传的时候，就可以执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;php artisan migrate:rollback --step=1
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;回滚上一个迁移&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;然后能看到&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Migrating: 2020_01_30_110448_create_posts_table
+Migrated:  2020_01_30_110448_create_posts_table (0.02 seconds)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;告诉我迁移成功了。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;数据表创建完成了，然后我们就需要为这一个储存的东西定义一个&lt;code&gt;Model&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;正如对laravel的理解一文的结尾所说，一个应用可能会有很多种数据呢，比如用户啦，比如文章啦。laravel不可能帮我们尽善尽美的都定义好，所以这个数据模型的模板就需要我们自己来定义。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;php artisan make:model Post
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后就能看到在项目的根目录下的&lt;code&gt;/app&lt;/code&gt;内多了一个&lt;code&gt;Post.php&lt;/code&gt;，初始内容如下&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;?&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;php&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;namespace&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;App&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Illuminate\Database\Eloquent\Model&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Post&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;extends&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Model&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;//
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个东西就是我们会经常用到的&lt;code&gt;laravel&lt;/code&gt;的&lt;code&gt;Model&lt;/code&gt;也叫&lt;code&gt;Eloquent&lt;/code&gt;模型啦&lt;/p&gt;
+&lt;p&gt;然后关于Model的更多东西请一定要去官方文档看，因为这东西他用处很多很多，我只讲讲最基础的增删改查什么的，这个的文档在：https://learnku.com/docs/laravel/6.x/eloquent/5176&lt;/p&gt;
+&lt;p&gt;这里给大家介绍一个东西叫做&lt;code&gt;tinker&lt;/code&gt;，这是一个交互式编程的环境，可以通过这条命令进入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;php artisan tinker
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;跟数据库有关的有什么东西呢都？无非就是增删改查啦。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;增&#34;&gt;增&lt;/h2&gt;
+&lt;p&gt;单条数据的增加我们可以这样&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Post&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;user_id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;gugugu&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;content&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;ge zi lai le&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;save&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;当然也可以这么写:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nx&#34;&gt;Post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;create&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;
+    &lt;span class=&#34;s1&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;gugugu&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;s1&#34;&gt;&amp;#39;content&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;ge zi lai le&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;s1&#34;&gt;&amp;#39;user_id&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;]);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但是这么写的话是一种批量赋值的手法，需要我们在model内定义什么样的属性允许批量赋值，比如:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;class Post extends Model
+{
+    protected $guarded = [&#39;id&#39;, &#39;user_id&#39;];
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;就是，除了&lt;code&gt;id&lt;/code&gt;和&lt;code&gt;user_id&lt;/code&gt;之外的东西都可以批量被赋值给新的&lt;code&gt;post&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;同样也可以声明一个&lt;code&gt;$fillable&lt;/code&gt;来声明哪些属性是允许被批量赋值的，简单地说的话&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$guarded&lt;/code&gt; 是黑名单而 &lt;code&gt;$fillable&lt;/code&gt; 是白名单&lt;/p&gt;
+&lt;h2 id=&#34;查&#34;&gt;查&lt;/h2&gt;
+&lt;p&gt;当需要根据id来查找一条数据，也就是获取一个Post实例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;find&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;当需要根据某个条件来查找一条数据，比如&lt;code&gt;title&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//获取一条数据,也就是一个Post实例 -&amp;gt;first()
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;//获取第一个文章标题是gugugu的文章
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;where&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;gugugu&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;first&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//获取所有数据,返回的会是一个集合,可以通过foreach进行遍历 -&amp;gt;get()
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;//获取所有user_id大于1的文章
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;where&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;user_id&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;get&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//也支持多个条件的说
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;where&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;
+	&lt;span class=&#34;s1&#34;&gt;&amp;#39;user_id&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;s1&#34;&gt;&amp;#39;title&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;gugugu&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;first&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;删&#34;&gt;删&lt;/h2&gt;
+&lt;p&gt;删除十分简单，在前面的查找获取到了某个实例之后，只需要调用&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;delete&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;即可删除数据&lt;/p&gt;
+&lt;h2 id=&#34;改&#34;&gt;改&lt;/h2&gt;
+&lt;p&gt;修改同样十分简单，直接修改实例的属性然后&lt;code&gt;save&lt;/code&gt;即可，例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;title&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;bugu bugu bugu&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$post&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;save&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+        </item>
+        <item>
+        <title>ES6的Proxy</title>
+        <link>https://blog.x3zvawq.xyz/p/es6-proxy/</link>
+        <pubDate>Mon, 27 Jan 2020 23:28:26 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/es6-proxy/</guid>
+        <description>&lt;p&gt;前段时间看阮一峰老师的&lt;code&gt;es6&lt;/code&gt;入门向大家提了一点关于解构赋值的问题之后，有个学长说&lt;code&gt;es6&lt;/code&gt;最难懂的应该是&lt;code&gt;Proxy&lt;/code&gt;了，所以说有难度的东西就应该挑战着玩一下的说。&lt;/p&gt;
+&lt;p&gt;然后看了一下觉得怪有意思的。所谓的&lt;code&gt;Proxy&lt;/code&gt;，是一个用于修改某些操作的默认行为，原话是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;说实话，我并不是很能明白这段话说了什么。简单的学习来看，&lt;code&gt;Proxy&lt;/code&gt;给了我一种人如其名的感觉，以网络为原型的话相当于在目标主机与请求方之间建立了一个代理，然后可以肆意的操作两边来往的数据。又有点像&lt;code&gt;laravel&lt;/code&gt;的中间件，又有点像&lt;code&gt;python&lt;/code&gt;的装饰器。&lt;/p&gt;
+&lt;p&gt;一个简单的例子&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;person&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;age&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;38&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;proxy&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;Proxy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;person&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;get&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;target&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;key&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;age&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;target&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;18&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;?&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;18&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;target&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt; 
+        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;else&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+            &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;target&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;console&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;proxy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;//18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里新建了一个&lt;code&gt;Proxy&lt;/code&gt;实例，定义了一个针对获取&lt;code&gt;person&lt;/code&gt;对象的属性的拦截行为，即&lt;code&gt;get&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;一般而言，调用person对象的属性会这么写成这样：&lt;code&gt;person.age&lt;/code&gt;，其中的&lt;code&gt;age&lt;/code&gt;就是属性名，然后&lt;code&gt;person&lt;/code&gt;是对象，然后在&lt;code&gt;Proxy&lt;/code&gt;也就是代理内部的话就可以获取到这个对象以及调用属性名，就是&lt;code&gt;target&lt;/code&gt;和&lt;code&gt;key&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;然后再调用&lt;code&gt;proxy&lt;/code&gt;的&lt;code&gt;get&lt;/code&gt;方法的时候实际上就执行了定义在&lt;code&gt;Proxy&lt;/code&gt;的&lt;code&gt;get&lt;/code&gt;方法。&lt;/p&gt;
+&lt;p&gt;写在Proxy内的方法的参数名字并不重要，顺序即可似乎。&lt;/p&gt;
+&lt;p&gt;Proxy支持的拦截操作似乎较多，但是很多都是目前的我不甚熟悉的，所以只做摘录(x&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;get(target, propKey, receiver)&lt;/code&gt;：拦截对象属性的读取，比如&lt;code&gt;proxy.foo&lt;/code&gt;和&lt;code&gt;proxy[&#39;foo&#39;]&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set(target, propKey, value, receiver)&lt;/code&gt;：拦截对象属性的设置，比如&lt;code&gt;proxy.foo = v&lt;/code&gt;或&lt;code&gt;proxy[&#39;foo&#39;] = v&lt;/code&gt;，返回一个布尔值。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;has(target, propKey)&lt;/code&gt;：拦截&lt;code&gt;propKey in proxy&lt;/code&gt;的操作，返回一个布尔值。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;deleteProperty(target, propKey)&lt;/code&gt;：拦截&lt;code&gt;delete proxy[propKey]&lt;/code&gt;的操作，返回一个布尔值。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ownKeys(target)&lt;/code&gt;：拦截&lt;code&gt;Object.getOwnPropertyNames(proxy)&lt;/code&gt;、&lt;code&gt;Object.getOwnPropertySymbols(proxy)&lt;/code&gt;、&lt;code&gt;Object.keys(proxy)&lt;/code&gt;、&lt;code&gt;for...in&lt;/code&gt;循环，返回一个数组。该方法返回目标对象所有自身的属性的属性名，而&lt;code&gt;Object.keys()&lt;/code&gt;的返回结果仅包括目标对象自身的可遍历属性。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;getOwnPropertyDescriptor(target, propKey)&lt;/code&gt;：拦截&lt;code&gt;Object.getOwnPropertyDescriptor(proxy, propKey)&lt;/code&gt;，返回属性的描述对象。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;defineProperty(target, propKey, propDesc)&lt;/code&gt;：拦截&lt;code&gt;Object.defineProperty(proxy, propKey, propDesc）&lt;/code&gt;、&lt;code&gt;Object.defineProperties(proxy, propDescs)&lt;/code&gt;，返回一个布尔值。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;preventExtensions(target)&lt;/code&gt;：拦截&lt;code&gt;Object.preventExtensions(proxy)&lt;/code&gt;，返回一个布尔值。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;getPrototypeOf(target)&lt;/code&gt;：拦截&lt;code&gt;Object.getPrototypeOf(proxy)&lt;/code&gt;，返回一个对象。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;isExtensible(target)&lt;/code&gt;：拦截&lt;code&gt;Object.isExtensible(proxy)&lt;/code&gt;，返回一个布尔值。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;setPrototypeOf(target, proto)&lt;/code&gt;：拦截&lt;code&gt;Object.setPrototypeOf(proxy, proto)&lt;/code&gt;，返回一个布尔值。如果目标对象是函数，那么还有两种额外操作可以拦截。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;apply(target, object, args)&lt;/code&gt;：拦截 Proxy 实例作为函数调用的操作，比如&lt;code&gt;proxy(...args)&lt;/code&gt;、&lt;code&gt;proxy.call(object, ...args)&lt;/code&gt;、&lt;code&gt;proxy.apply(...)&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;construct(target, args)&lt;/code&gt;：拦截 Proxy 实例作为构造函数调用的操作，比如&lt;code&gt;new proxy(...args)&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;对于&lt;code&gt;get&lt;/code&gt;方法而言,允许传入的三个参数分别是&lt;code&gt;target&lt;/code&gt;，&lt;code&gt;key&lt;/code&gt;，&lt;code&gt;receiver&lt;/code&gt;，分别代表着&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;代理的目标&lt;/li&gt;
+&lt;li&gt;获取的参数&lt;/li&gt;
+&lt;li&gt;读操作所在对象(一般就是&lt;code&gt;proxy&lt;/code&gt;的实例)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;然后有些注意事项就是即使在&lt;code&gt;proxy&lt;/code&gt;内也不能修改来自&lt;code&gt;target&lt;/code&gt;的&lt;code&gt;read-only and non-configurable&lt;/code&gt;，至于为什么要有这个规则不是很符合我的理解。这不符合一个作为中间件或者代理服务器的行为，说明我对他的理解出现了一些偏差。&lt;/p&gt;
+&lt;p&gt;比如这个&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;Object&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;defineProperties&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;({},{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;age&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;value&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;19&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;writable&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;configurable&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;false&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;},&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;value&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;咕咕咕&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;writable&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;configurable&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;false&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;},&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;proxy&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;Proxy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;get&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;k&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;18&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;console&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;proxy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;age&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样的代码当&lt;code&gt;x&lt;/code&gt;的&lt;code&gt;age&lt;/code&gt;确实是&lt;code&gt;18&lt;/code&gt;的时候，可以正常返回&lt;code&gt;18&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;但是当&lt;code&gt;x.age&lt;/code&gt;不是18的时候则会遇到报错：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;TypeError: &#39;get&#39; on proxy: property &#39;age&#39; is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value (expected &#39;19&#39; but got &#39;18&#39;)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;让人感到有些困惑。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>饥荒联机版mod开发摸鱼(一)</title>
+        <link>https://blog.x3zvawq.xyz/p/dontstarve-modding-2/</link>
+        <pubDate>Sun, 26 Jan 2020 13:19:56 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/dontstarve-modding-2/</guid>
+        <description>&lt;p&gt;今天又遇到了一个全新的问题，就是把昨天的鱼塘mod配方改了，然后可以做出来鱼塘了，但是这个鱼塘他并不会生产东西了。于是我今天继续琢磨起来了(x&lt;/p&gt;
+&lt;p&gt;在每个&lt;code&gt;prefabs&lt;/code&gt;的看着很像构造方法的&lt;code&gt;fn&lt;/code&gt;内一般能看到许多的&lt;code&gt;inst:AddComponent&lt;/code&gt;操作，似乎是给这个实例绑定一个部件，嗯。。也有一种接口的意思，比如这段代码&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;AddComponent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;harvestable&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetUp&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;pondfish&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;onharvest&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;updatelevel&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ListenForEvent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;childgoinghome&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;onchildgoinghome&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;就是给当前实例绑定一个harvestable接口，让这个实例变成一个可被收获的实例，然后第二行进一步设置收获的规则，这里调用了一个&lt;code&gt;harvestable&lt;/code&gt;实例的&lt;code&gt;SetUp&lt;/code&gt;的函数，这个类的代码在&lt;code&gt;scripts/components/harvestable.lua&lt;/code&gt;，代码如下&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;SetUp&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;product&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;max&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;onharvest&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ongrow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetProduct&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;product&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;max&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetGrowTime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetOnGrowFn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ongrow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetOnHarvestFn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;onharvest&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StartGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;各个参数的语义也很清晰，然后看看这个接口是怎么实现的。在开头部分可以看到一部分类的定义：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Harvestable&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Class&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.inst&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.produce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.growtime&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.product&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.ongrowfn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.maxproduce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;produce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;onproduce&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;不得不说，&lt;code&gt;lua&lt;/code&gt;这个闭包是真的很丑,虽然我也不清楚这个能不能算得上是一种闭包，但是从代码大概可以知道这个类会有哪些属性，好的我们继续。回到&lt;code&gt;Harvestable:SetUp&lt;/code&gt;方法，可以看到方法体内部有5行。前面四行都是设置一些类属性的，然后最后调用了一个没有参数的方法，好的 那个很可疑，遂找到方法体：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;StartGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StopGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;growtime&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;time&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;or&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.growtime&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;growtime&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.task&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;DoTaskInTime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;growtime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Grow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;grow&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.targettime&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;GetTime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;growtime&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;大意是，如果&lt;code&gt;growtime&lt;/code&gt;有值的话就执行一个&lt;code&gt;inst:DoTaskInTime&lt;/code&gt;，那么问题来了，这个代码好像不好找。&lt;/p&gt;
+&lt;p&gt;好了我又回来了，通过全局搜索&lt;code&gt;DoTaskInTime(time&lt;/code&gt;找到了一个疑似该方法的定义，位于&lt;code&gt;scripts/entityscript.lua&lt;/code&gt;文件内，代码如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;EntityScript&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;DoTaskInTime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;...)&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;--print (&amp;#34;DO TASK IN TIME&amp;#34;, time, self)&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.pendingtasks&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.pendingtasks&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{}&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+    
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;per&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;scheduler&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ExecuteInTime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.GUID&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;...)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;self.pendingtasks&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;per&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;per.onfinish&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;task_finish&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;-- function() if self and self.pendingtasks then self.pendingtasks[per] = nil end end&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;per&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;对不起，看着有点复杂，涉及的可能会有点多，所以我决定先掠过一下，留下一个猜测根据&lt;code&gt;scheduler:ExecuteInTime&lt;/code&gt;这是一个让某个函数在某个时间点后执行的方法。&lt;/p&gt;
+&lt;p&gt;然后在&lt;code&gt;StartGrowing(time)&lt;/code&gt;内传入的是一个&lt;code&gt;function() self:Grow() end&lt;/code&gt;的很像闭包的东西，好的然后找到中间那个方法的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;Grow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.produce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.maxproduce&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;self.produce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.produce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.ongrowfn&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;self.ongrowfn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;self.inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.produce&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.produce&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;self.maxproduce&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StartGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;else&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StopGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;是一个非常简单的逻辑，所以对于这个接口是怎么运行的就大概明白了。&lt;/p&gt;
+&lt;p&gt;在前面的&lt;code&gt;inst.components.harvestable:SetUp(&amp;quot;pondfish&amp;quot;, 3, nil, onharvest, updatelevel)&lt;/code&gt;内第三个时间参数是&lt;code&gt;nil&lt;/code&gt;所以不会长，但是之前没改mod文件之前有蜜蜂会去采蜜，然后就会有鱼了。&lt;/p&gt;
+&lt;p&gt;但是在&lt;code&gt;harvest&lt;/code&gt;部分还有第三行&lt;code&gt;inst:ListenForEvent(&amp;quot;childgoinghome&amp;quot;, onchildgoinghome)&lt;/code&gt;，意思似乎是添加一个&lt;code&gt;Listener&lt;/code&gt;来监听孩子回家，然后第二个参数好像在哪里见过的方法，遂在这个mod的代码内搜索:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;onchildgoinghome&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;data.child&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;and&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;data.child&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;components.pollinator&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;and&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;data.child&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;components.pollinator&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;HasCollectedEnough&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Grow&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;哦豁，他直接在这里调用了&lt;code&gt;harvestable&lt;/code&gt;的&lt;code&gt;Grow&lt;/code&gt;方法。所以意思是只要蜜蜂去采蜜了，那么就能有东西生成了，但是现在的问题是它根本就不产生蜜蜂。&lt;/p&gt;
+&lt;p&gt;所以猜测问题有可能是在生蜜蜂那里&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;AddComponent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;childspawner&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner.childname&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;bee&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetRegenPeriod&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TUNING.BEEBOX_REGEN_TIME&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetSpawnPeriod&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TUNING.BEEBOX_RELEASE_TIME&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetMaxChildren&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TUNING.BEEBOX_BEES&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;  
+
+&lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TheWorld.state&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;isday&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;and&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TheWorld.state&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;issummer&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StartSpawning&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;嗯。。？这里怎么混进了一个判断语句？看语义是如果是在夏天的白天就开始生动物&lt;/p&gt;
+&lt;p&gt;感觉应该还有别的地方有这个&lt;code&gt;StartSpawning&lt;/code&gt;,不然在其它季节建造的不就炸了。然后搜索&lt;code&gt;StartSpawning&lt;/code&gt;,找到了这个方法：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;OnIsDay&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;inst&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;isday&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;isday&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;and&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable.growtime&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StopGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StopSpawning&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;elseif&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TheWorld.state&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;iswinter&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;and&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable.growtime&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;harvestable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StartGrowing&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+            &lt;span class=&#34;n&#34;&gt;inst.components&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;childspawner&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StartSpawning&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;逻辑有些混乱，找找在哪里调用了这个方法吧&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;inst:WatchWorldState(&amp;quot;isday&amp;quot;, OnIsDay)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;感觉又是一个&lt;code&gt;Listener&lt;/code&gt;，或者说&lt;code&gt;Watcher&lt;/code&gt;？那么大概就明白了？ 每个白天的开始都会执行一次这个方法？&lt;/p&gt;
+&lt;p&gt;然后在这个方法里面控制了怎么产生产物。&lt;/p&gt;
+&lt;p&gt;除此之外也有&lt;code&gt;onsleep&lt;/code&gt;和&lt;code&gt;stopsleep&lt;/code&gt;的方法在里面控制了通过&lt;code&gt;harvestable&lt;/code&gt;产生产品，并且在构造方法内把这两个方法绑定到了&lt;code&gt;entitysleep&lt;/code&gt;和&lt;code&gt;entitywake&lt;/code&gt;两个&lt;code&gt;Listener&lt;/code&gt;上，然而这两个&lt;code&gt;Listener&lt;/code&gt;什么时候触发我也完全不知道。&lt;/p&gt;
+&lt;p&gt;剩下的东西明天再写，咕咕咕&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>饥荒联机版mod开发摸鱼(一)</title>
+        <link>https://blog.x3zvawq.xyz/p/dontstarve-modding-1/</link>
+        <pubDate>Sat, 25 Jan 2020 23:20:44 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/dontstarve-modding-1/</guid>
+        <description>&lt;p&gt;今日起床较晚，本来计划着今天的每日一摸应该去搞一搞&lt;code&gt;es6&lt;/code&gt;的&lt;code&gt;Proxy&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;并且也确实看了一会儿觉得挺好玩的，但是还没有摸完就有人提到了昨天玩饥荒遇到的事情&lt;/p&gt;
+&lt;p&gt;我们装了一个鱼塘的mod，然后那个作者上一次更新是好几年前，然后近期饥荒更新了一个部分就是原来钓鱼获得的死鱼现在是活鱼并且可以称重。&lt;/p&gt;
+&lt;p&gt;但是呢，那个鱼塘他的合成配方还是那个死鱼，所以就不能合成了。。。&lt;/p&gt;
+&lt;p&gt;然后我在游戏的&lt;code&gt;scripts&lt;/code&gt;目录找了半天并没有找到淡水鱼这个&lt;code&gt;prefabs&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;然后我就寻思着说不定fish即可以表示死鱼也能表示活鱼呢。。然后我就以这个错误的方向去找了很久的证据，然后脸被打的啪啪响。&lt;/p&gt;
+&lt;p&gt;其实一开始我会这么想纯粹是因为看到了一个&lt;code&gt;meats.lua&lt;/code&gt;，也就是肉，在这个文件里面定义了很多的肉类，然后由于这个游戏的代码结构并不是很熟悉，所以我就踩了一个坑(x&lt;/p&gt;
+&lt;p&gt;找到正确的方向是因为突然灵光一闪，根据饥荒的烹饪系统，每个食物都会有不同的属性，比如鱼是1个单位的鱼，1个单位的肉。然后我找到了&lt;code&gt;scripts&lt;/code&gt;根目录下的&lt;code&gt;cooking.lua&lt;/code&gt;文件，这个文件里面定义了各个食物的烹饪属性，然后我翻到了fish发现它只有一个定义。然后人都傻了。因为有一个叫&lt;code&gt;Show Me&lt;/code&gt;的mod可以在游戏内显示食物的各个烹饪属性，然后之前在游戏内看到了活鱼是0.5个单位的鱼和0.5个单位的肉。&lt;/p&gt;
+&lt;p&gt;不对，然后我就继续在&lt;code&gt;cooking.lua&lt;/code&gt;找了一会儿，看到了一个肉和鱼都是0.5单位的，然后看到了一个&lt;code&gt;prefab&lt;/code&gt;叫&lt;code&gt;pondfish&lt;/code&gt;。然后。。莫非就是它了？这就是我找了一个下午的它？&lt;/p&gt;
+&lt;p&gt;在游戏内开控制台&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;c_give(&#39;pondfish&#39;)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;啊！是他，一条活生生的鱼。&lt;/p&gt;
+&lt;p&gt;感觉干了一下午的无用功，看了挺多代码的。&lt;/p&gt;
+&lt;p&gt;收获大概就是大概明白了饥荒这个游戏scripts目录下面的一些文件的作用，以及更多的关于&lt;code&gt;lua&lt;/code&gt;的语言特性，常用写法什么的，跟我之前写手游挂机脚本用的那些&lt;code&gt;lua&lt;/code&gt;有比较大的区别。&lt;/p&gt;
+&lt;p&gt;可以看到在prefabs文件夹下的很多东西都会有&lt;code&gt;onXxxx&lt;/code&gt;的&lt;code&gt;function&lt;/code&gt;，里面大致是一些触发某事件的行为，但是我并没有找到调用这些事件的地方，或许可以看看&lt;code&gt;actions.lua&lt;/code&gt;这个文件，当然还有更多的可能需要找。&lt;/p&gt;
+&lt;p&gt;然后就是看了半天并没有找到程序的入口，这让人十分难受。也就是所谓的main函数，我的想法就是他应该会在一个很明显的位置，然后刚刚找到&lt;code&gt;pondfish&lt;/code&gt;这个东西突然发现我看了这么久的代码还不知道到处可以看到的&lt;code&gt;inst&lt;/code&gt;到底是个什么意思，遂百度之：&lt;code&gt;instance&lt;/code&gt;指代的是某个物品或者单位的实例。&lt;/p&gt;
+&lt;p&gt;然后发现每个东西的下面总会有一个&lt;code&gt;fn&lt;/code&gt;或者&lt;code&gt;commonfn&lt;/code&gt;方法，看起来特别像扮演构造方法的角色，然后第一行就是&lt;code&gt;local inst = CreateEntity()&lt;/code&gt;随在&lt;code&gt;CreateEntity&lt;/code&gt;上按下了转到定义，然后一小会儿之后vscode带我到了一个叫&lt;code&gt;mainfunctions.lua&lt;/code&gt;的文件里面，好家伙，里面有好多我平时看到的奇奇怪怪的函数。&lt;/p&gt;
+&lt;p&gt;然后最关键的是在这个文件旁边我还看到了一个&lt;code&gt;main.lua&lt;/code&gt;,联想到c语言的&lt;code&gt;int main()&lt;/code&gt;，再想到java的&lt;code&gt;public static void main(String[] args)&lt;/code&gt;，这莫非就是。。遂点开&lt;/p&gt;
+&lt;p&gt;哦豁，看起来很像这个东西了啊！&lt;/p&gt;
+&lt;p&gt;里面有好多的&lt;code&gt;require()&lt;/code&gt;，看起来引用了很多的东西。&lt;/p&gt;
+&lt;p&gt;但是开头也有很多没预先定义的方法，所以最开始的入口是不是这个还真的不是很清楚，可能需要明天继续看&lt;/p&gt;
+&lt;p&gt;不得不说，慢慢的摸透一个程序的运行机制真的很爽(雾&lt;/p&gt;
+&lt;p&gt;然后这可能是真的每日摸鱼吧(x&lt;/p&gt;
+&lt;p&gt;然后又回到最初的起点，要让现在的版本可以做出那个鱼塘应该只需要吧&lt;code&gt;AddRecipe()&lt;/code&gt;方法内的参数的&lt;code&gt;fish&lt;/code&gt;换成&lt;code&gt;pondfish&lt;/code&gt;就好了&lt;/p&gt;
+&lt;p&gt;不过要考虑到在新的版本这个mod还能不能变得好玩，那么就要让他的生成物也变成现在的版本的东西。&lt;/p&gt;
+&lt;p&gt;或许可以考虑以后可以业余写一写饥荒的mod，23333&lt;/p&gt;
+&lt;p&gt;其实游戏开发者好像也为&lt;code&gt;modder&lt;/code&gt;留下了很多的余地,虽然这可能也是解释型的脚本语言不可避免地吧。&lt;/p&gt;
+&lt;p&gt;然后就是这样了，前面提到的目标留到以后实现。。嗯&lt;/p&gt;
+&lt;p&gt;我寻思着我应该会再有一篇文章叫做饥荒联机版mod开发摸鱼(二)什么的吧，2333&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Laravel的简要理解(教学笔记)</title>
+        <link>https://blog.x3zvawq.xyz/p/laravel-note-1/</link>
+        <pubDate>Fri, 24 Jan 2020 12:50:42 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/laravel-note-1/</guid>
+        <description>&lt;p&gt;第一次接触MVC这个概念是2018-2019年后端组的授课，当时好像以zlb从SpeedPHP改写的FlashPHP举得例子，然后当时的我也并不知道SpeedPHP是什么，并且现在依旧不知道。&lt;/p&gt;
+&lt;p&gt;所谓的MVC，百度一下有很多的blog和什么什么的，甚至百度百科也有这个词条，是一个软件设计模式，然而当时的我看的再多也并没有多么深刻的理解，所以说抛开实践谈理解是有点困难的说。&lt;/p&gt;
+&lt;p&gt;然后在寒假参与的寒假项目一个人怼完了一个项目之后倒是对这个有了比较深刻的了解，当时的我就是用FlashPHP做的那个项目，还记得当时分任务的时候有分具体的这个功能，前端我做，后端你做。然而后来觉得再不约定好怎么传值的情况下还不如一个人负责一整个功能(x&lt;/p&gt;
+&lt;p&gt;所谓的MVC就是Model-View-Controller 模型-视图-控制器，然而没有实践过的话要明白这个有点困难，所以就先不对每个名词进行解释。&lt;/p&gt;
+&lt;p&gt;在用户的浏览器对服务器发起访问的过程中，就是浏览器向服务器发送了一个请求的数据包，然后服务器收到这个请求数据包之后整理好用户需要的东西包在响应数据包里边返回给用户，然后浏览器解析响应数据包展现给用户看他想看的东西。&lt;/p&gt;
+&lt;p&gt;上面这段话描述的其实就是一个完整的http请求过程。只是省略了在服务器发生的事情和在浏览器发生的事情，然后这篇文章主要涉及到的会是在服务器发生的那些事。&lt;/p&gt;
+&lt;p&gt;以laravel为例，过程大概是这样的&lt;/p&gt;
+&lt;h4 id=&#34;路由&#34;&gt;路由&lt;/h4&gt;
+&lt;p&gt;服务器接收到一个请求&lt;/p&gt;
+&lt;p&gt;这个请求的url(也就是链接)假如是&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;https://acm.njupt.edu.cn/contest/120?parm=eheihei
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;在上面的这个链接里面可以理解成包含四个部分，这么看这个url，&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;https://&lt;/code&gt;  &lt;code&gt;acm.njupt.edu.cn&lt;/code&gt;  &lt;code&gt;[:443]  &lt;/code&gt;  &lt;code&gt;/contest/120&lt;/code&gt;  &lt;code&gt;?parm=eheihei&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;有四个部分，它们分别是&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;协议 &lt;code&gt;https://&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;告诉服务器使用的是什么协议，&lt;/li&gt;
+&lt;li&gt;常见的基本就http和https&lt;/li&gt;
+&lt;li&gt;这个可以不加理会&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;域名 &lt;code&gt;acm.njupt.edu.cn&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;在网络上的计算机都会有一个ip地址作为让别人找到他的依据&lt;/li&gt;
+&lt;li&gt;这个域名可以理解成ip地址的助记符，毕竟ip地址一串数字怪难记的&lt;/li&gt;
+&lt;li&gt;其实这个也不需要多么理会&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;端口 &lt;code&gt;[:443]  &lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;一般http协议通过80端口，然后https协议通过443端口&lt;/li&gt;
+&lt;li&gt;然后这个端口一般是可以省略的，所以我们也不需要理会&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;路径 &lt;code&gt;/contest/120&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;前面三个都不需要理会而我又专门提了url这个概念就意味着后面的这个东西比较重要了&lt;/li&gt;
+&lt;li&gt;在没有url重写的站点上经常可以见到访问/index.html这种操作&lt;/li&gt;
+&lt;li&gt;实际上就是浏览器告诉服务器说我希望浏览服务器上根目录的index.html这个文件&lt;/li&gt;
+&lt;li&gt;然后服务器看到这个文件有，你权限也够，噢那我就直接给你了，这也是一个响应&lt;/li&gt;
+&lt;li&gt;当然这是一种处理方式，对于这种可以直接给用户的比如html文件，但是有一些是不能直接给用户看的呢，比如说index.php，这个时候服务器就会把他丢给对应的应用服务器，比如php一般丢给php-fpm&lt;/li&gt;
+&lt;li&gt;然后这个应用服务器处理完之后吧index.php变成一个html丢回给主服务器然后服务器再丢回给用户&lt;/li&gt;
+&lt;li&gt;其实前面的5个白点点都是突然想起来然后就打出来了(x&lt;/li&gt;
+&lt;li&gt;在laravel里面，这一个部分会被作为依据由路由把请求解析到一个控制器上，还是后面再说好了&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;查询串
+&lt;ul&gt;
+&lt;li&gt;众所周知，四大天王一般有五个，所以四个部分应该有五个黑点&lt;/li&gt;
+&lt;li&gt;虽然大家一般把这个部分放到路径里边，但是我觉得还是分开来比较好(x&lt;/li&gt;
+&lt;li&gt;这里主要是进行GET传值的，其实也不会特别重要。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;那么科普就都这里，所谓的路由，就是根据前面的路径来把请求分流，因为一个网站要实现的功能会比较多，所以请求也会有不同的类别，比如这个请求要看主页，另一个请求要看个人中心。&lt;/p&gt;
+&lt;p&gt;路由就是一个&lt;code&gt;通过请求的url的路径来判断出这是个什么类别的请求，然后把这个请求丢给对应的部分去处理的&lt;/code&gt;行为。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;当然，laravel允许直接在路由里面返回请求，但这种操作并不优雅也就是并不推荐这么干&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;而这个处理请求的部分，就叫Controller(控制器)，他的职责很简单，就是处理请求，返回响应。这里的请求与响应请看该文章的第五自然段。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;所以说，在想实现一个功能的第一件事，先给他定义一个路由：我该怎么访问这个功能？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;laravel的项目根目录有一个文件夹，叫routes，而他的下面会默认有四个文件，我们需要操作的通常只有&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;web.php&lt;/code&gt; 和 &lt;code&gt;api.php&lt;/code&gt; 其中web是有状态的，api是无状态的。关于什么是有没有状态，这个暂且不论。&lt;/p&gt;
+&lt;p&gt;一个新的项目&lt;code&gt;web.php&lt;/code&gt;下面应该会有这样一段代码&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nx&#34;&gt;Route&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;get&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;view&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;welcome&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;就是把处理方式写在路由定义里面，通过一个闭包，这是一种不推荐的方式&lt;/p&gt;
+&lt;p&gt;我们一般会这么写&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;nx&#34;&gt;Route&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;get&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;/home&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;HomeController@index&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;会把url的路径部分为/home的请求交给HomeController控制器的index方法进行处理&lt;/p&gt;
+&lt;h4 id=&#34;控制器&#34;&gt;控制器&lt;/h4&gt;
+&lt;p&gt;所谓的控制器，前面也说过，用于处理请求，返回响应。&lt;/p&gt;
+&lt;p&gt;在laravel项目的根目录下面有一个叫app的文件夹，一般情况下我们的绝大多数代码都会写在这个里面，然后再仔细看，有一个Http文件夹，再往里面看，有一个叫Controllers的文件夹， 没错就是他。我们的控制器都会写在这个里面，一般情况下新创建的项目代码解构大概如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;app
+├── Console
+│   └── Kernel.php
+├── Exceptions
+│   └── Handler.php
+├── Http
+│   ├── Controllers
+│   │   ├── Auth
+│   │   │   └── ...(一些预定义好的用于权限验证的控制器)
+│   │   └── Controller.php
+│   ├── Kernel.php
+│   └── Middleware
+│       └── ...(一些中间件，中间件的概念之后再讲)
+├── Providers
+│   └── ...(一些服务提供者)
+└── User.php
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;创建控制器可以用artisan创建，artisan是一个php脚本，这个单词翻译叫工匠的说，我们一般用artisan来执行一些比较麻烦的操作。比如创建控制器&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;php artisan make:controller HomeController
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后在Controllers里面就会出现一个新的文件&lt;code&gt;HomeController.php&lt;/code&gt; ，里面会给给我们预先写好一些代码&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;?&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;php&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;namespace&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;App\Http\Controllers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Illuminate\Http\Request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HomeController&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;extends&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Controller&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;//
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这就是一个最简单的控制器，关于每行代码是干什么的可以暂且不提，因为提了也理解不了(x&lt;/p&gt;
+&lt;p&gt;我们需要的就是在他打了注释的地方写我们新的东西，比如为了配合前面写好的路由写一个index方法&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;index&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Request&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;现在&lt;code&gt;HomeController.php&lt;/code&gt;里面是这样的&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;?&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;php&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;namespace&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;App\Http\Controllers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Illuminate\Http\Request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;HomeController&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;extends&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;Controller&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;index&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Request&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或许在laravel看来，所谓的优雅很大一部分是语义化。&lt;/p&gt;
+&lt;p&gt;看看我写的这个方法，他传入的参数是一个Request类，我们可以把他看成用户发出的请求，然而他也确实是用户发出的请求的对象，由我们的laravel框架帮我们把浏览器发出的我们不容易操作的数据包变成了一个我们容易操作的对象，然后我们就可以通过这个对象来获取一些我们需要的东西。具体怎么操作之后再操作。&lt;/p&gt;
+&lt;p&gt;然后看方法体，就是&lt;code&gt;return &#39;咕咕咕&#39;; &lt;/code&gt; 顾名思义就是返回一个咕咕咕，再填充一下这句话就是就是 服务器返回一个咕咕咕给客户端。然后我们尝试着访问一下？&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+		&lt;a href=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/1.png&#34; data-size=&#34;819x248&#34;&gt;
+			&lt;img srcset=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/1_hudc247a99690236cb473ecb0202ed66c9_21069_480x0_resize_box_2.png 480w, https://blog.x3zvawq.xyz/p/laravel-note-1/1_hudc247a99690236cb473ecb0202ed66c9_21069_1024x0_resize_box_2.png 1024w&#34;
+				src=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/1.png&#34; width=&#34;819&#34; height=&#34;248&#34; loading=&#34;lazy&#34;
+				alt=&#34;image-20200124120708795&#34;&gt;
+		&lt;/a&gt;
+		
+		&lt;figcaption&gt;image-20200124120708795&lt;/figcaption&gt;
+		
+	&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;看，成功了(x 这就是控制器要干的事情&lt;/p&gt;
+&lt;p&gt;所以控制器部分，我们需要做的是对应着一开始我们定义的路由，建立我们的控制器，并且在里面写方法，然后这个方法里面写代码，然后return。这样的代码就可以称之为我们这个功能的业务逻辑了。&lt;/p&gt;
+&lt;p&gt;然后，我们继续&lt;/p&gt;
+&lt;h4 id=&#34;请求&#34;&gt;请求&lt;/h4&gt;
+&lt;p&gt;事实证明，万物皆对象是一个十分优秀的思想，如果让我们直接处理浏览器发给服务器的数据包的话那工作量想必是十分的大的，但是laravel框架会帮我们把那个数据包，也就是请求打包成一个request对象，就是我们写在index方法的参数里面的那个。&lt;/p&gt;
+&lt;p&gt;我们可以通过它干什么呢？举个例子：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;index&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Request&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$request&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;ip&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;我们把index方法写成这样，再访问一次看看&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+		&lt;a href=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/2.png&#34; data-size=&#34;819x248&#34;&gt;
+			&lt;img srcset=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/2_hu3c5cb595713fd0f85049f5f022067397_21311_480x0_resize_box_2.png 480w, https://blog.x3zvawq.xyz/p/laravel-note-1/2_hu3c5cb595713fd0f85049f5f022067397_21311_1024x0_resize_box_2.png 1024w&#34;
+				src=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/2.png&#34; width=&#34;819&#34; height=&#34;248&#34; loading=&#34;lazy&#34;
+				alt=&#34;image-20200124121402999&#34;&gt;
+		&lt;/a&gt;
+		
+		&lt;figcaption&gt;image-20200124121402999&lt;/figcaption&gt;
+		
+	&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;哇 我看到了我自己的ip, 因为我是在访问我自己的电脑，所以ip地址是127.0.0.1，这个ip地址往往代表的是自己哦(x 我 访 问 我 自 己。&lt;/p&gt;
+&lt;p&gt;但是如果有一天你的网站部署在网络上，然后网络上的另一个人访问了你，是不是意味着你可以通过这种方式获取他的ip呢？&lt;/p&gt;
+&lt;p&gt;同样的，request对象可以实现的事情有很多，在此就不说太多了，可以参阅官方的&lt;a class=&#34;link&#34; href=&#34;https://learnku.com/docs/laravel/6.x/requests/5139&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;文档&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&#34;响应&#34;&gt;响应&lt;/h4&gt;
+&lt;p&gt;既然讲了请求，那么一定要讲讲响应。&lt;/p&gt;
+&lt;p&gt;看了前面的内容，对响应应该是一个什么样的看法呢？只是&lt;code&gt;return &#39;咕咕咕&#39;&lt;/code&gt;里面的&lt;code&gt;&#39;咕咕咕&#39;&lt;/code&gt; 吗？，万物皆对象，万物皆对象。所以在laravel框架里面，其实响应他也是一个对象，并且是一个属于Response类的实例。&lt;/p&gt;
+&lt;p&gt;那么为什么我们看起来只是一个简单的字符串呢？因为有laravel在幕后帮我们进行了包装，把这个简简单单的字符串包装成了一个响应的实例再丢回给浏览器。&lt;/p&gt;
+&lt;p&gt;既然这样，那么我们必然也是可以通过直接返回一个响应，让laravel歇一歇的，比如我们可以这么写：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;public&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;index&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;Request&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$request&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;response&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;404&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;再次访问，这次我们按F12打开控制台，看到明明访问成功了，也显示咕咕咕了，但是在Network里面浏览器却误认为这个请求404了。所以我们同样也是可以操作response这个对象来欺骗浏览器。&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+		&lt;a href=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/3.png&#34; data-size=&#34;880x595&#34;&gt;
+			&lt;img srcset=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/3_hu98f65795f44b8d2a1861307536a283b6_58631_480x0_resize_box_2.png 480w, https://blog.x3zvawq.xyz/p/laravel-note-1/3_hu98f65795f44b8d2a1861307536a283b6_58631_1024x0_resize_box_2.png 1024w&#34;
+				src=&#34;https://blog.x3zvawq.xyz/p/laravel-note-1/3.png&#34; width=&#34;880&#34; height=&#34;595&#34; loading=&#34;lazy&#34;
+				alt=&#34;image-20200124122200781&#34;&gt;
+		&lt;/a&gt;
+		
+		&lt;figcaption&gt;image-20200124122200781&lt;/figcaption&gt;
+		
+	&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;前面说的都是返回点字符串什么的，但是我们更常用的是返回&lt;code&gt;json&lt;/code&gt;和返回视图，也就是MVC中的&lt;code&gt;V(iew)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;但是使用方法也大致相同。就先不说了(雾&lt;/p&gt;
+&lt;h4 id=&#34;模型&#34;&gt;模型&lt;/h4&gt;
+&lt;p&gt;这里说的模型指的是数据模型。什么叫数据模型呢？这就要说到关系型数据库了，不知道什么叫关系型数据库？你知道MySQL嘛，MySQL就是一个关系型数据库，如果MySQL都不知道的话，你可以理解成一个比较硬核的Excel。就是有行有列的那种表格。&lt;/p&gt;
+&lt;p&gt;我们一般认为一行是一条数据，一条数据可以是什么呢？ 可以是文章,一篇文章有内容，简介，标题，作者等，这些属性就可以构成4个列。一个表格就这么形成了。&lt;/p&gt;
+&lt;p&gt;万物皆对象，那么上一段所说的一条数据能不能也当成是一个对象？ 可以的，以文章为例。我们可以有一个类Post，然后所有的文章都可以整成Post这个类的实例，其实这种操作，laravel已经帮我们弄好了，也就是这个的标题，所谓的(数据)模型，也就是MVC中的&lt;code&gt;M(odel)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;但是嘛，一个应用可能会有很多种数据呢，比如用户啦，比如文章啦。laravel不可能帮我们尽善尽美的都定义好，所以这个数据模型的模板就需要我们自己来定义啦。上artisan&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;php artisan make:model Post
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;算了这个也先不说了( 字数太多了&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>ES6变量的解构赋值</title>
+        <link>https://blog.x3zvawq.xyz/p/es6-destructuring/</link>
+        <pubDate>Thu, 23 Jan 2020 11:34:14 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/es6-destructuring/</guid>
+        <description>&lt;p&gt;第一次感受过类似的东西应该是在看ks写的NOJ的front utils的时候，项目原先alert框的定义是这个样子的:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;alert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;content&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Notice&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;icon&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;information-outline&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;backdrop&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;static&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;//do something
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样子在调用函数的时候大概是这样调用的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;nx&#34;&gt;alert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;欸嘿嘿&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;事实证明，没有接触过更好的方法就不会觉得现在的方法不太行，可能是用习惯了，对此也没什么意见甚至觉得这难道不是应该的么。&lt;/p&gt;
+&lt;p&gt;然后有了几个新的方法，是这么定义的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;confirm&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;({&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;content&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;title&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Confirm&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;icon&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;information-outline&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;backdrop&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;static&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;noText&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Cancel&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;yesText&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;OK&amp;#34;&lt;/span&gt;
+	&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{},&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;callback&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;deny&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){}){&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;//do something
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样子在调用函数的时候大概是这样调用的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;nx&#34;&gt;confirm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;({&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;content&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕?&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;noText&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;布谷布谷&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;yesText&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;咕咕咕&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;},&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;deny&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;//do something
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样子在调用函数的时候传入的值和参数的对应关系就很明了了(x&lt;/p&gt;
+&lt;p&gt;与此相反的是，在写php的时候用到array_search(), strpos()等function的时候总是分不清哪个参数该放哪里，以及参数个数比较多的时候也是一个噩梦，然后当有多个省略参数的时候，比如&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span class=&#34;k&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;do&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;parmA&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;parmB&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;parmC&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;//do something
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果希望第二个参数使用默认值但是第三个参数使用传入值的话第二个参数就不能留空什么的了(x 虽然这种情况也可以使用php的关联数组来解决，然而这样的话就需要开发者在方法内部进行一些比较复杂的判断。&lt;/p&gt;
+&lt;p&gt;如果使用前面js的第二种定义方法就不一样了，想使用默认值的直接不写那个key就好了。&lt;/p&gt;
+&lt;p&gt;当时还不明白这是一种什么写法，只觉得十分的优雅，直到有一次深夜的飞机到了目的地没有地铁在一家遇见小面里面用苏菲go打开了阮一峰老师的ES6入门看到了变量的解构赋值，才意识到了，噢！&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;常见的操作就是&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;z&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;按照顺序对应关系是&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;x -&amp;gt; a
+y -&amp;gt; b
+z -&amp;gt; c
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;允许不完全匹配，就是左边的值可以少于右边的值比如&lt;code&gt;let [x,y] = [a,b,c]&lt;/code&gt;则是&lt;code&gt;x-&amp;gt;a y-&amp;gt;b&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;允许使用默认值，&lt;code&gt;let [x,y = &#39;A&#39;] = [a,b]&lt;/code&gt;当右边对应的值严格等于&lt;code&gt;undefined&lt;/code&gt;的时候，左边的元素会取默认值。以及默认值可以引用其他变量，这个比较绕（x&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;当右边的模式不是数组的时候，会尝试把右边转化成一个对象，如果成功并且具有Iterator接口就可以匹配，否则会报错(x&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;支持嵌套比如&lt;code&gt;let [x,[y1,y2],z] = [a,[b1,b2],z]&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;同样的对象也支持解构赋值，正如前面所说的函数参数的定义那个样子&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;b&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;aaa&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;bbb&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;是&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;aaa&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;bbb&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;aaa&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;bbb&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;的简写，阮一峰老师的原文举了比较多的例子，我当时是懵了一下的，左边的模式key和value的变量名傻傻的弄不清楚。&lt;/p&gt;
+&lt;p&gt;然后短暂的思考后大概理解就是解构赋值实际上是模式匹配，就是匹配左右两边的模式，然后把value对应的赋值给左边的变量。然后在上面的例子里，模式就是对象这个结构以及key，js通过对象里面相同的key来建立左边和右边的关系，然后把建立起来关系的右边的值赋值给左边。或者说 模式就是key?&lt;/p&gt;
+&lt;p&gt;以及这个模式匹配是可以嵌套的，然后可能就会产生比较复杂的情况了(x&lt;/p&gt;
+&lt;p&gt;比如阮一峰老师的原文&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;obj&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+ &lt;span class=&#34;nx&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
+   &lt;span class=&#34;s1&#34;&gt;&amp;#39;Hello&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+   &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;World&amp;#39;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+ &lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}]&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;obj&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// &amp;#34;Hello&amp;#34;
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// &amp;#34;World&amp;#34;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;注意，这时&lt;code&gt;p&lt;/code&gt;是模式，不是变量，因此不会被赋值。如果&lt;code&gt;p&lt;/code&gt;也要作为变量赋值，可以写成下面这样。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;obj&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+ &lt;span class=&#34;nx&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;
+   &lt;span class=&#34;s1&#34;&gt;&amp;#39;Hello&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+   &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;World&amp;#39;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+ &lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}]&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;obj&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// &amp;#34;Hello&amp;#34;
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// &amp;#34;World&amp;#34;
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;p&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// [&amp;#34;Hello&amp;#34;, {y: &amp;#34;World&amp;#34;}]
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;p&gt;对于后者的情况其实有一些不理解的地方(x&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;因为前文说过&lt;code&gt;let { a, b } = { a: &#39;aaa&#39;, b: &#39;bbb&#39;};&lt;/code&gt;与&lt;code&gt;let { a: aaa, b: bbb } = { a: &#39;aaa&#39;, b: &#39;bbb&#39;}&lt;/code&gt;是一样的，那么&lt;code&gt;let { p, p: [x, { y }] } = obj;&lt;/code&gt;是不是应该和&lt;code&gt;let { p: p, p: [x, { y }] } = obj;&lt;/code&gt;是一样的，那么这样的话左边的模式就有两个key都是p是撞了的。&lt;/p&gt;
+&lt;p&gt;然后发现跟我想的不大一样，然后ks给我举了一个栗子&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;obj&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nx&#34;&gt;person&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;nx&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;chen&amp;#39;&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;person&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;obj&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nx&#34;&gt;console&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;person&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后报错说没有产生&lt;code&gt;person&lt;/code&gt;这个变量，然后如果写成&lt;code&gt;const { person, person: { name } }&lt;/code&gt;就可以了，然后又回到了之前的问题:这么写不就相当于&lt;code&gt;const {person: person, person: { name } }&lt;/code&gt;那么是不是还是装了。。然后xy说解构不会处理模式本身，只处理对应的属性。就是&lt;code&gt;person&lt;/code&gt;解构&lt;code&gt;obj&lt;/code&gt;,而&lt;code&gt;name&lt;/code&gt;解构&lt;code&gt;person&lt;/code&gt;。说实话这里我并不是很明白(x&lt;/p&gt;
+&lt;p&gt;然后我进行了一波注定没有结果的实验，这里就不记录了(x&lt;/p&gt;
+&lt;p&gt;然后xy又说解构本质上还是引用对象里的属性 &lt;code&gt;obj.p&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;然后我就冒出了一个猜想，既然左边的模式不把他处理成一个对象的话那是不是就没有键与值的去别的，实际上就只是模式以键的形式进行表达。&lt;/p&gt;
+&lt;p&gt;对于&lt;code&gt;let {p} = obj&lt;/code&gt;的话应该直接&lt;code&gt;let p = obj.p&lt;/code&gt;, 对于 let {p : p} 实际上也是&lt;code&gt;let p = obj.p&lt;/code&gt;, 但是如果是&lt;code&gt;let {p: [x, { y }]} = obj&lt;/code&gt;，则应该是 &lt;code&gt;let [x, { y }] = obj.p&lt;/code&gt;会再经过一次解构赋值。&lt;/p&gt;
+&lt;p&gt;这么想的话好像就没毛病了(x 那就先把猜想放在这里把，或许之后知识面更广了可以再来琢磨这个。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;然后文章开头提到的那个函数传参的写法就正是利用了对象的解构赋值。&lt;/p&gt;
+&lt;p&gt;然后省略了一堆注意点，以下是用途：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;交换变量的值 &lt;code&gt;let [x,y] = [1,2]&lt;/code&gt;，则可以通过&lt;code&gt;[y,x] = [x,y]&lt;/code&gt;来实现交换&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;从函数返回多个值&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;swap&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;swap&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;233&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;555&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;函数参数的默认值 就如文章开头的做法&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;提取json数据&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;jsonData&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+  &lt;span class=&#34;nx&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;42&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+  &lt;span class=&#34;nx&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;OK&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+  &lt;span class=&#34;nx&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;867&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;5309&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+  
+&lt;span class=&#34;kd&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;status&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;data&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;number&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;jsonData&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;遍历map解构&lt;code&gt;for (let [key, value] of map)&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;导入模块的指定方法&lt;code&gt;const { SourceMapConsumer, SourceNode } = require(&amp;quot;source-map&amp;quot;);&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>雨中冒险2-拾取装备的详细描述修改</title>
+        <link>https://blog.x3zvawq.xyz/p/ror2-modify-display/</link>
+        <pubDate>Wed, 22 Jan 2020 00:52:37 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/ror2-modify-display/</guid>
+        <description>&lt;p&gt;最近沉迷雨中冒险2，然后看了一次视频发现别人玩的时候捡道具的显示为什么都那么详细呢(于是我就去找了一下相关的mod，后来发现原来只是简单的改语言文件就可以了。考虑到刚有一个大版本更新，多了不少道具原来的语言文件覆盖了可能会炸，于是就自己动手丰衣足食啦。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://blog.x3zvawq.xyz/images/rain-of-risk-item-describe/1.png&#34; alt=&#34;img&#34;  /&gt;&lt;/p&gt;
+&lt;p&gt;语言文件的目录位于(steam为steam安装目录。)&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{steam}\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Language\zh-CN
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;下面的json文件就是了，以及有一个txt文件目测可以用来修改字体。原字体看着挺舒服的我就没有琢磨了。&lt;/p&gt;
+&lt;p&gt;打开那个json之后，&lt;strong&gt;正则替换执行下面的正则表达式&lt;/strong&gt;即可。&lt;/p&gt;
+&lt;p&gt;注意空格什么的一定要对，替换完之后要注意观察跟原来有没有不同，比如逗号后面多空格也会导致载入失败好像。我就踩过这个坑。&lt;/p&gt;
+&lt;h4 id=&#34;1被动道具的描述&#34;&gt;1.被动道具的描述&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;  &amp;quot;ITEM_([A-Z]+)_PICKUP&amp;quot; : &amp;quot;(.+)&amp;quot;,\n  &amp;quot;ITEM_([A-Z]+)_DESC&amp;quot; : &amp;quot;(.+)&amp;quot;,
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;替换为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  &amp;quot;ITEM_$1_PICKUP&amp;quot; : &amp;quot;$4&amp;quot;,\n  &amp;quot;ITEM_$3_DESC&amp;quot; : &amp;quot;$4&amp;quot;,
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;2主动装备的描述&#34;&gt;2.主动装备的描述&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;  &amp;quot;EQUIPMENT_([A-Z]+)_PICKUP&amp;quot; : &amp;quot;(.+)&amp;quot;,\n  &amp;quot;EQUIPMENT_([A-Z]+)_DESC&amp;quot; : &amp;quot;(.+)&amp;quot;,
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;替换为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  &amp;quot;EQUIPMENT_$1_PICKUP&amp;quot; : &amp;quot;$4&amp;quot;,\n  &amp;quot;EQUIPMENT_$3_DESC&amp;quot; : &amp;quot;$4&amp;quot;,
+&lt;/code&gt;&lt;/pre&gt;</description>
+        </item>
+        <item>
+        <title>Linux上的饥荒服务器搭建</title>
+        <link>https://blog.x3zvawq.xyz/p/dontstarve-linux-server/</link>
+        <pubDate>Wed, 22 Jan 2020 00:35:04 +0800</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/dontstarve-linux-server/</guid>
+        <description>&lt;p&gt;无聊的暑假，想和小伙伴联机玩一下饥荒，本来也想不到要自己搭一个服务器的，奈何后来直接游戏里面启动服务器发现客机总是会卡的令人难以接受，然后我才意识我我和我的小伙伴一个是电信网一个是移动网。以及我们玩人类一败涂地也有着比较高的延迟，于是没有办法了，想好好打饥荒就必须得搭一个服务器了。正好有一个闲置的阿里云服务器，因为嫌备案麻烦一直丢在那里，正好物尽其用。&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+		&lt;a href=&#34;https://blog.x3zvawq.xyz/p/dontstarve-linux-server/1.jpg&#34; data-size=&#34;1000x708&#34;&gt;
+			&lt;img srcset=&#34;https://blog.x3zvawq.xyz/p/dontstarve-linux-server/1_hu54b45838f18e2c07a060d85f49affbbb_410225_480x0_resize_q75_box.jpg 480w, https://blog.x3zvawq.xyz/p/dontstarve-linux-server/1_hu54b45838f18e2c07a060d85f49affbbb_410225_1024x0_resize_q75_box.jpg 1024w&#34;
+				src=&#34;https://blog.x3zvawq.xyz/p/dontstarve-linux-server/1.jpg&#34; width=&#34;1000&#34; height=&#34;708&#34; loading=&#34;lazy&#34;
+				alt=&#34;img&#34;&gt;
+		&lt;/a&gt;
+		
+		&lt;figcaption&gt;img&lt;/figcaption&gt;
+		
+	&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;确实踩了不少的坑，因为饥荒的配置文件经过一次不小的更新，整个都变了，所以网上很多的教程其实都已经过期了，本文主要讲述一下我是怎么干的吧.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://developer.valvesoftware.com/wiki/SteamCMD&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;steamcmd怎么使用的官方教程(英文)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://dontstarve.fandom.com/wiki/Guides/Don%e2%80%99t_Starve_Together_Dedicated_Servers&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;自建服务器的饥荒官方教程(英文)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://developer.valvesoftware.com/wiki/Dedicated_Servers_List&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;steamcmd支持的专业服务器列表(英文)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;http://blog.ttionya.com/article-1235.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;饥荒联机独立服务器搭建教程（三）：配置篇&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;先给steamcmd专门创建一个用户，虽然我不知道有没有这个必要，但是感觉全都用一个root账号并不好，独立开来也挺好的。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ useradd -m steam
+$ cd /home/steam
+$ passwd steam
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;之后给新用户输入一个密码，之后切换到新建的用户安装steamcmd，通过apt安装理论上会自动安装依赖吧，如果没有自动安装的话请参照&lt;a class=&#34;link&#34; href=&#34;https://developer.valvesoftware.com/wiki/SteamCMD&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;steamcmd怎么使用的官方教程(英文)&lt;/a&gt;里的&lt;code&gt;Downloading SteamCMD - Linux - Manually&lt;/code&gt;进行安装。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ su steam
+$ sudo apt install steamcmd
+$ ln -s /usr/games/steamcmd steamcmd
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;上述最后一行我也不知道有没有必要惹，link一个快捷方式而已。之后直接启动steamcmd就可以了。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ steamcmd
+Redirecting stderr to &#39;/home/steam/.steam/logs/stderr.txt&#39;
+[  0%] Checking for available updates...
+[----] Verifying installation...
+Steam Console Client (c) Valve Corporation
+-- type &#39;quit&#39; to exit --
+Loading Steam API...OK.
+
+Steam&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;到了这里steam就已经成功启动了，然后我们要做的就是安装一下DST的专用服务器。首先登陆账号，跟着下面输入。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Steam&amp;gt;login username
+... #第一次登录会要求输入密码，以及可能的话还会有验证码照着输入即可
+Logging in user &#39;loop_void&#39; to Steam Public ...
+Logged in OK
+Waiting for user info...OK
+
+Steam&amp;gt;force_install_dir /home/steam/steamapps/DST
+
+Steam&amp;gt;app_update 343050 validate
+... #然后就是漫长的下载了,这里的343050是饥荒专业服务器的id
+
+Steam&amp;gt;quit
+$
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;到这里服务器应该就已经安装好了，到steam的用户目录下应该已经可以看到这几个文件夹了，这个时候这个目录下应该还是没有.klei文件夹的，我当时按照别的教程纠结了半天我的.klei呢&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ ll
+...
+drwxrwxr-x 9 steam steam  4096 Aug 24 16:27 .steam/
+drwxrwxr-x 3 steam steam  4096 Jul 29 14:33 steamapps/
+lrwxrwxrwx 1 steam steam    19 Jul 12 20:47 steamcmd -&amp;gt; /usr/games/steamcmd*
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;之后继续…&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ cd /steamapps/DST/bin
+$ ./dontstarve_dedicated_server_nullrenderer
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;会开始刷屏，等到不动了直接 Ctrl+C 整个关掉，这个时候返回&lt;code&gt;/home/steam&lt;/code&gt;可以看到已经多了一个&lt;code&gt;.klei&lt;/code&gt;的目录了&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ cd ~
+$ tree .klei/
+.klei/
+├── Agreements
+│   └── DoNotStarveTogether
+│       └── agreements.ini
+└── DoNotStarveTogether
+    └── Cluster_1
+        └── ...
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;到这里就已经成功了大半了，之后只需要把位置文件，用户token什么的都弄好放进同一个文件夹再放到&lt;code&gt;./klei/DoNotStarveTogether&lt;/code&gt; 这个文件夹下面。这一部分可以参考 &lt;a class=&#34;link&#34; href=&#34;http://blog.ttionya.com/article-1235.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;饥荒联机独立服务器搭建教程（三）：配置篇&lt;/a&gt; 。&lt;/p&gt;
+&lt;p&gt;其实这些配置并不需要自己一个一个的手动去配置，只需要本地游戏中创建世界，设定好你想要的mod和各种世界选项之后进入游戏，等世界创建完进入到选人界面之后直接退出，然后去&lt;code&gt;~\Documents\Klei\DoNotStarveTogether\steam_id&lt;/code&gt;这个目录里面找到对应的Cluster_x；&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;~对应的是系统用户的目录&lt;/li&gt;
+&lt;li&gt;steam_id是创建世界用的steam账号的id，如果只用一个账号登陆过的话应该只会有一个数字作为名字的目录&lt;/li&gt;
+&lt;li&gt;x就是创建世界的时候对应的第几个格子&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;把那个文件夹复制出来，按照 &lt;a class=&#34;link&#34; href=&#34;http://blog.ttionya.com/article-1235.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;饥荒联机独立服务器搭建教程（三）：配置篇&lt;/a&gt; 内的方法把你的klei用户token放到&lt;code&gt;cluster_token.txt&lt;/code&gt;里面即可。&lt;/p&gt;
+&lt;p&gt;然后把整个文件夹都复制到服务器的&lt;code&gt; ./klei/DoNotStarveTogether&lt;/code&gt;内，服务器就配置就大致完成了。如果把原来生成的世界删掉打算在服务器上再次生成的话可以删除&lt;code&gt;Master&lt;/code&gt;和&lt;code&gt;Caves&lt;/code&gt;内的&lt;code&gt;saves&lt;/code&gt;文件夹和一些别的东西，这个时候存档文件夹应该像这样。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ tree Cluster_1
+Cluster_1
+├── Caves
+│   ├── leveldataoverride.lua
+│   ├── modoverrides.lua
+│   └── server.ini
+├── cluster.ini
+├── cluster_token.txt
+└── Master
+    ├── leveldataoverride.lua
+    ├── modoverrides.lua
+    └── server.ini
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;如果打算把原来的存档也挪移到服务器上则不需要删除任何文件夹。 然后还需要把你的mod的id告诉服务器让服务器去下载这些mod，可以参照 &lt;a class=&#34;link&#34; href=&#34;http://blog.ttionya.com/article-1235.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;饥荒联机独立服务器搭建教程（三）：配置篇&lt;/a&gt; 中的 6、配置下载的 Mod 文件 ， &lt;code&gt;dedicated_server_mods_setup.lua&lt;/code&gt; 在&lt;code&gt;/home/steam/steamapps/DST/mods&lt;/code&gt;目录内。&lt;/p&gt;
+&lt;p&gt;到这里配置都弄好了，只需要启动服务器就可以了。注意一定要切换到&lt;code&gt;dontstarve_dedicated_server_nullrenderer&lt;/code&gt;所在的目录内去运行这个东西，不然会发生很快乐的事情。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ ./dontstarve_dedicated_server_nullrenderer
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;即可，默认会运行Cluster_1这个存档中的Master世界，如果想要运行两个世界的话可以运行两次这个程序在后面分别添加参数&lt;code&gt;-shard Master&lt;/code&gt;和&lt;code&gt;-shard Caves&lt;/code&gt;,当然，同样可以添加参数&lt;code&gt;-cluster Cluster_x&lt;/code&gt;来指定加载哪一个存档。&lt;/p&gt;
+&lt;p&gt;你可能发现了当你运行了这个程序之后就不能再干别的事情了，Ctrl+C会直接中止服务器，这个时候可以考虑一下使用screen这个程序，如果服务器上没有screen则可以这么安装。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo apt install screen
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后该执行的代码就变成了&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ screen -S &amp;quot;DST Server Master&amp;quot; ./dontstarve_dedicated_server_nullrenderer -shard Master -cluster Cluster_1
+$ screen -S &amp;quot;DST Server Caves&amp;quot; ./dontstarve_dedicated_server_nullrenderer -shard Caves -cluster Cluster_1
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;进入一个screen之后按Ctrl+A然后松开再按D即可返回，上面的两条命令中间就需要进行一次这个操作。执行完第二条命令之后也可以这么干把终端腾出来。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;screen -ls&lt;/code&gt; 可以查看所有的在运行的screen,&lt;code&gt;screen -r id&lt;/code&gt;可以回到某一个screen，如果只有一个运行中的screen则不需要输入id，id可以输入&lt;code&gt;screen -ls&lt;/code&gt;看到正在运行的所有screen的id&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Title</title>
+        <link>https://blog.x3zvawq.xyz/p/test-chinese/</link>
+        <pubDate>Tue, 26 Mar 2019 08:47:11 +0100</pubDate>
+        
+        <guid>https://blog.x3zvawq.xyz/p/test-chinese/</guid>
+        <description>&lt;img src="https://blog.x3zvawq.xyz/p/test-chinese/head.jpg" alt="Featured image of post Title" /&gt;&lt;p&gt;&lt;figure&gt;
+		&lt;a href=&#34;https://blog.x3zvawq.xyz/p/test-chinese/head.jpg&#34; data-size=&#34;1500x1000&#34;&gt;
+			&lt;img srcset=&#34;https://blog.x3zvawq.xyz/p/test-chinese/head_hu958d513eeefe5556a31d065479ecc5ac_14205_480x0_resize_q75_box.jpg 480w, https://blog.x3zvawq.xyz/p/test-chinese/head_hu958d513eeefe5556a31d065479ecc5ac_14205_1024x0_resize_q75_box.jpg 1024w&#34;
+				src=&#34;https://blog.x3zvawq.xyz/p/test-chinese/head.jpg&#34; width=&#34;1500&#34; height=&#34;1000&#34; loading=&#34;lazy&#34;
+				alt=&#34;image&#34;&gt;
+		&lt;/a&gt;
+		
+		&lt;figcaption&gt;image&lt;/figcaption&gt;
+		
+	&lt;/figure&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;nt&#34;&gt;&amp;#34;hello&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;world&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+        </item>
+        
+    </channel>
+</rss>

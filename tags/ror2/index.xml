@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ror2 on X3ZvaWQ</title>
+    <link>https://blog.x3zvawq.xyz/tags/ror2/</link>
+    <description>Recent content in ror2 on X3ZvaWQ</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhcn</language>
+    <lastBuildDate>Wed, 22 Jan 2020 00:52:37 +0800</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/tags/ror2/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>雨中冒险2-拾取装备的详细描述修改</title>
+      <link>https://blog.x3zvawq.xyz/p/ror2-modify-display/</link>
+      <pubDate>Wed, 22 Jan 2020 00:52:37 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/ror2-modify-display/</guid>
+      <description>最近沉迷雨中冒险2，然后看了一次视频发现别人玩的时候捡道具的显示为什么都那么详细呢(于是我就去找了一下相关的mod，后来发现原来只是简单的改语言文件就可以了。考虑到刚有一个大版本更新，多了不少道具原来的语言文件覆盖了可能会炸，于是就自己动手丰衣足食啦。
+语言文件的目录位于(steam为steam安装目录。)
+{steam}\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Language\zh-CN 下面的json文件就是了，以及有一个txt文件目测可以用来修改字体。原字体看着挺舒服的我就没有琢磨了。
+打开那个json之后，正则替换执行下面的正则表达式即可。
+注意空格什么的一定要对，替换完之后要注意观察跟原来有没有不同，比如逗号后面多空格也会导致载入失败好像。我就踩过这个坑。
+1.被动道具的描述  &amp;quot;ITEM_([A-Z]+)_PICKUP&amp;quot; : &amp;quot;(.+)&amp;quot;,\n &amp;quot;ITEM_([A-Z]+)_DESC&amp;quot; : &amp;quot;(.+)&amp;quot;, 替换为
+ &amp;quot;ITEM_$1_PICKUP&amp;quot; : &amp;quot;$4&amp;quot;,\n &amp;quot;ITEM_$3_DESC&amp;quot; : &amp;quot;$4&amp;quot;, 2.主动装备的描述  &amp;quot;EQUIPMENT_([A-Z]+)_PICKUP&amp;quot; : &amp;quot;(.+)&amp;quot;,\n &amp;quot;EQUIPMENT_([A-Z]+)_DESC&amp;quot; : &amp;quot;(.+)&amp;quot;, 替换为
+ &amp;quot;EQUIPMENT_$1_PICKUP&amp;quot; : &amp;quot;$4&amp;quot;,\n &amp;quot;EQUIPMENT_$3_DESC&amp;quot; : &amp;quot;$4&amp;quot;, </description>
+    </item>
+    
+  </channel>
+</rss>

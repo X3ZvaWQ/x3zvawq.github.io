@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>dontstarve on X3ZvaWQ</title>
+    <link>https://blog.x3zvawq.xyz/categories/dontstarve/</link>
+    <description>Recent content in dontstarve on X3ZvaWQ</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhcn</language>
+    <lastBuildDate>Sun, 26 Jan 2020 13:19:56 +0800</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/categories/dontstarve/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>饥荒联机版mod开发摸鱼(一)</title>
+      <link>https://blog.x3zvawq.xyz/p/dontstarve-modding-2/</link>
+      <pubDate>Sun, 26 Jan 2020 13:19:56 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/dontstarve-modding-2/</guid>
+      <description>今天又遇到了一个全新的问题，就是把昨天的鱼塘mod配方改了，然后可以做出来鱼塘了，但是这个鱼塘他并不会生产东西了。于是我今天继续琢磨起来了(x
+在每个prefabs的看着很像构造方法的fn内一般能看到许多的inst:AddComponent操作，似乎是给这个实例绑定一个部件，嗯。。也有一种接口的意思，比如这段代码
+inst:AddComponent(&amp;#34;harvestable&amp;#34;) inst.components.harvestable:SetUp(&amp;#34;pondfish&amp;#34;, 3, nil, onharvest, updatelevel) inst:ListenForEvent(&amp;#34;childgoinghome&amp;#34;, onchildgoinghome) 就是给当前实例绑定一个harvestable接口，让这个实例变成一个可被收获的实例，然后第二行进一步设置收获的规则，这里调用了一个harvestable实例的SetUp的函数，这个类的代码在scripts/components/harvestable.lua，代码如下
+function Harvestable:SetUp(product, max, time, onharvest, ongrow) self:SetProduct(product, max) self:SetGrowTime(time) self:SetOnGrowFn(ongrow) self:SetOnHarvestFn(onharvest) self:StartGrowing() end 各个参数的语义也很清晰，然后看看这个接口是怎么实现的。在开头部分可以看到一部分类的定义：
+local Harvestable = Class(function(self, inst) self.inst = inst self.produce = 0 self.growtime = nil self.product = nil self.ongrowfn = nil self.maxproduce = 1 end, nil, { produce = onproduce, } ) 不得不说，lua这个闭包是真的很丑,虽然我也不清楚这个能不能算得上是一种闭包，但是从代码大概可以知道这个类会有哪些属性，好的我们继续。回到Harvestable:SetUp方法，可以看到方法体内部有5行。前面四行都是设置一些类属性的，然后最后调用了一个没有参数的方法，好的 那个很可疑，遂找到方法体：
+function Harvestable:StartGrowing(time) self:StopGrowing() local growtime = time or self.growtime if growtime then self.</description>
+    </item>
+    
+    <item>
+      <title>饥荒联机版mod开发摸鱼(一)</title>
+      <link>https://blog.x3zvawq.xyz/p/dontstarve-modding-1/</link>
+      <pubDate>Sat, 25 Jan 2020 23:20:44 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/dontstarve-modding-1/</guid>
+      <description>今日起床较晚，本来计划着今天的每日一摸应该去搞一搞es6的Proxy
+并且也确实看了一会儿觉得挺好玩的，但是还没有摸完就有人提到了昨天玩饥荒遇到的事情
+我们装了一个鱼塘的mod，然后那个作者上一次更新是好几年前，然后近期饥荒更新了一个部分就是原来钓鱼获得的死鱼现在是活鱼并且可以称重。
+但是呢，那个鱼塘他的合成配方还是那个死鱼，所以就不能合成了。。。
+然后我在游戏的scripts目录找了半天并没有找到淡水鱼这个prefabs
+然后我就寻思着说不定fish即可以表示死鱼也能表示活鱼呢。。然后我就以这个错误的方向去找了很久的证据，然后脸被打的啪啪响。
+其实一开始我会这么想纯粹是因为看到了一个meats.lua，也就是肉，在这个文件里面定义了很多的肉类，然后由于这个游戏的代码结构并不是很熟悉，所以我就踩了一个坑(x
+找到正确的方向是因为突然灵光一闪，根据饥荒的烹饪系统，每个食物都会有不同的属性，比如鱼是1个单位的鱼，1个单位的肉。然后我找到了scripts根目录下的cooking.lua文件，这个文件里面定义了各个食物的烹饪属性，然后我翻到了fish发现它只有一个定义。然后人都傻了。因为有一个叫Show Me的mod可以在游戏内显示食物的各个烹饪属性，然后之前在游戏内看到了活鱼是0.5个单位的鱼和0.5个单位的肉。
+不对，然后我就继续在cooking.lua找了一会儿，看到了一个肉和鱼都是0.5单位的，然后看到了一个prefab叫pondfish。然后。。莫非就是它了？这就是我找了一个下午的它？
+在游戏内开控制台
+c_give(&#39;pondfish&#39;) 啊！是他，一条活生生的鱼。
+感觉干了一下午的无用功，看了挺多代码的。
+收获大概就是大概明白了饥荒这个游戏scripts目录下面的一些文件的作用，以及更多的关于lua的语言特性，常用写法什么的，跟我之前写手游挂机脚本用的那些lua有比较大的区别。
+可以看到在prefabs文件夹下的很多东西都会有onXxxx的function，里面大致是一些触发某事件的行为，但是我并没有找到调用这些事件的地方，或许可以看看actions.lua这个文件，当然还有更多的可能需要找。
+然后就是看了半天并没有找到程序的入口，这让人十分难受。也就是所谓的main函数，我的想法就是他应该会在一个很明显的位置，然后刚刚找到pondfish这个东西突然发现我看了这么久的代码还不知道到处可以看到的inst到底是个什么意思，遂百度之：instance指代的是某个物品或者单位的实例。
+然后发现每个东西的下面总会有一个fn或者commonfn方法，看起来特别像扮演构造方法的角色，然后第一行就是local inst = CreateEntity()随在CreateEntity上按下了转到定义，然后一小会儿之后vscode带我到了一个叫mainfunctions.lua的文件里面，好家伙，里面有好多我平时看到的奇奇怪怪的函数。
+然后最关键的是在这个文件旁边我还看到了一个main.lua,联想到c语言的int main()，再想到java的public static void main(String[] args)，这莫非就是。。遂点开
+哦豁，看起来很像这个东西了啊！
+里面有好多的require()，看起来引用了很多的东西。
+但是开头也有很多没预先定义的方法，所以最开始的入口是不是这个还真的不是很清楚，可能需要明天继续看
+不得不说，慢慢的摸透一个程序的运行机制真的很爽(雾
+然后这可能是真的每日摸鱼吧(x
+然后又回到最初的起点，要让现在的版本可以做出那个鱼塘应该只需要吧AddRecipe()方法内的参数的fish换成pondfish就好了
+不过要考虑到在新的版本这个mod还能不能变得好玩，那么就要让他的生成物也变成现在的版本的东西。
+或许可以考虑以后可以业余写一写饥荒的mod，23333
+其实游戏开发者好像也为modder留下了很多的余地,虽然这可能也是解释型的脚本语言不可避免地吧。
+然后就是这样了，前面提到的目标留到以后实现。。嗯
+我寻思着我应该会再有一篇文章叫做饥荒联机版mod开发摸鱼(二)什么的吧，2333</description>
+    </item>
+    
+    <item>
+      <title>Linux上的饥荒服务器搭建</title>
+      <link>https://blog.x3zvawq.xyz/p/dontstarve-linux-server/</link>
+      <pubDate>Wed, 22 Jan 2020 00:35:04 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/dontstarve-linux-server/</guid>
+      <description>无聊的暑假，想和小伙伴联机玩一下饥荒，本来也想不到要自己搭一个服务器的，奈何后来直接游戏里面启动服务器发现客机总是会卡的令人难以接受，然后我才意识我我和我的小伙伴一个是电信网一个是移动网。以及我们玩人类一败涂地也有着比较高的延迟，于是没有办法了，想好好打饥荒就必须得搭一个服务器了。正好有一个闲置的阿里云服务器，因为嫌备案麻烦一直丢在那里，正好物尽其用。
+  img 
+确实踩了不少的坑，因为饥荒的配置文件经过一次不小的更新，整个都变了，所以网上很多的教程其实都已经过期了，本文主要讲述一下我是怎么干的吧.
+ steamcmd怎么使用的官方教程(英文) 自建服务器的饥荒官方教程(英文) steamcmd支持的专业服务器列表(英文) 饥荒联机独立服务器搭建教程（三）：配置篇  先给steamcmd专门创建一个用户，虽然我不知道有没有这个必要，但是感觉全都用一个root账号并不好，独立开来也挺好的。
+$ useradd -m steam $ cd /home/steam $ passwd steam 之后给新用户输入一个密码，之后切换到新建的用户安装steamcmd，通过apt安装理论上会自动安装依赖吧，如果没有自动安装的话请参照steamcmd怎么使用的官方教程(英文)里的Downloading SteamCMD - Linux - Manually进行安装。
+$ su steam $ sudo apt install steamcmd $ ln -s /usr/games/steamcmd steamcmd 上述最后一行我也不知道有没有必要惹，link一个快捷方式而已。之后直接启动steamcmd就可以了。
+$ steamcmd Redirecting stderr to &#39;/home/steam/.steam/logs/stderr.txt&#39; [ 0%] Checking for available updates... [----] Verifying installation... Steam Console Client (c) Valve Corporation -- type &#39;quit&#39; to exit -- Loading Steam API.</description>
+    </item>
+    
+  </channel>
+</rss>

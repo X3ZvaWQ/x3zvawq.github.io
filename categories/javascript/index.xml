@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>javascript on X3ZvaWQ</title>
+    <link>https://blog.x3zvawq.xyz/categories/javascript/</link>
+    <description>Recent content in javascript on X3ZvaWQ</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhcn</language>
+    <lastBuildDate>Mon, 27 Jan 2020 23:28:26 +0800</lastBuildDate><atom:link href="https://blog.x3zvawq.xyz/categories/javascript/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ES6的Proxy</title>
+      <link>https://blog.x3zvawq.xyz/p/es6-proxy/</link>
+      <pubDate>Mon, 27 Jan 2020 23:28:26 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/es6-proxy/</guid>
+      <description>前段时间看阮一峰老师的es6入门向大家提了一点关于解构赋值的问题之后，有个学长说es6最难懂的应该是Proxy了，所以说有难度的东西就应该挑战着玩一下的说。
+然后看了一下觉得怪有意思的。所谓的Proxy，是一个用于修改某些操作的默认行为，原话是：
+ Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。
+ 说实话，我并不是很能明白这段话说了什么。简单的学习来看，Proxy给了我一种人如其名的感觉，以网络为原型的话相当于在目标主机与请求方之间建立了一个代理，然后可以肆意的操作两边来往的数据。又有点像laravel的中间件，又有点像python的装饰器。
+一个简单的例子
+let person = { name: &amp;#39;咕咕咕&amp;#39;, age: 38 } let proxy = new Proxy(person, { get : (target, key) =&amp;gt; { if(key == &amp;#39;age&amp;#39;) { return target[key] &amp;gt; 18 ? 18 : target[key]; }else{ return target[key]; } } }) console.log(proxy.age) //18 这里新建了一个Proxy实例，定义了一个针对获取person对象的属性的拦截行为，即get
+一般而言，调用person对象的属性会这么写成这样：person.age，其中的age就是属性名，然后person是对象，然后在Proxy也就是代理内部的话就可以获取到这个对象以及调用属性名，就是target和key。
+然后再调用proxy的get方法的时候实际上就执行了定义在Proxy的get方法。
+写在Proxy内的方法的参数名字并不重要，顺序即可似乎。
+Proxy支持的拦截操作似乎较多，但是很多都是目前的我不甚熟悉的，所以只做摘录(x
+  get(target, propKey, receiver)：拦截对象属性的读取，比如proxy.foo和proxy[&#39;foo&#39;]。 set(target, propKey, value, receiver)：拦截对象属性的设置，比如proxy.foo = v或proxy[&#39;foo&#39;] = v，返回一个布尔值。 has(target, propKey)：拦截propKey in proxy的操作，返回一个布尔值。 deleteProperty(target, propKey)：拦截delete proxy[propKey]的操作，返回一个布尔值。 ownKeys(target)：拦截Object.</description>
+    </item>
+    
+    <item>
+      <title>ES6变量的解构赋值</title>
+      <link>https://blog.x3zvawq.xyz/p/es6-destructuring/</link>
+      <pubDate>Thu, 23 Jan 2020 11:34:14 +0800</pubDate>
+      
+      <guid>https://blog.x3zvawq.xyz/p/es6-destructuring/</guid>
+      <description>第一次感受过类似的东西应该是在看ks写的NOJ的front utils的时候，项目原先alert框的定义是这个样子的:
+function alert(content, title=&amp;#34;Notice&amp;#34;, icon=&amp;#34;information-outline&amp;#34;, backdrop = &amp;#34;static&amp;#34;) { //do something } 这样子在调用函数的时候大概是这样调用的：
+alert(&amp;#39;咕咕咕&amp;#39;, &amp;#39;欸嘿嘿&amp;#39;); 事实证明，没有接触过更好的方法就不会觉得现在的方法不太行，可能是用习惯了，对此也没什么意见甚至觉得这难道不是应该的么。
+然后有了几个新的方法，是这么定义的：
+function confirm ({ content=&amp;#34;&amp;#34;, title=&amp;#34;Confirm&amp;#34;, icon=&amp;#34;information-outline&amp;#34;, backdrop=&amp;#34;static&amp;#34;, noText=&amp;#34;Cancel&amp;#34;, yesText=&amp;#34;OK&amp;#34; }={}, callback=function(deny){}){ //do something } 这样子在调用函数的时候大概是这样调用的：
+confirm({ content: &amp;#39;咕咕咕?&amp;#39;, noText: &amp;#34;布谷布谷&amp;#34;, yesText: &amp;#39;咕咕咕&amp;#39; },deny =&amp;gt; { //do something }); 这样子在调用函数的时候传入的值和参数的对应关系就很明了了(x
+与此相反的是，在写php的时候用到array_search(), strpos()等function的时候总是分不清哪个参数该放哪里，以及参数个数比较多的时候也是一个噩梦，然后当有多个省略参数的时候，比如
+function do(parmA, parmB = false, parmC = true){ //do something } 如果希望第二个参数使用默认值但是第三个参数使用传入值的话第二个参数就不能留空什么的了(x 虽然这种情况也可以使用php的关联数组来解决，然而这样的话就需要开发者在方法内部进行一些比较复杂的判断。
+如果使用前面js的第二种定义方法就不一样了，想使用默认值的直接不写那个key就好了。
+当时还不明白这是一种什么写法，只觉得十分的优雅，直到有一次深夜的飞机到了目的地没有地铁在一家遇见小面里面用苏菲go打开了阮一峰老师的ES6入门看到了变量的解构赋值，才意识到了，噢！
+ 常见的操作就是
+let [x,y,z] = [a,b,c]; 按照顺序对应关系是</description>
+    </item>
+    
+  </channel>
+</rss>
